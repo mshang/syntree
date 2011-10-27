@@ -2,7 +2,7 @@
 	<head>
 		<title>Syntax Tree Generator</title>
 		<style type="text/css">
-		canvas { background: white; }
+		canvas { border: 1px solid ; background: white; }
 		</style>
 	</head>
 	<body>
@@ -10,6 +10,7 @@
 		
 			/* TODO:
 			 * Add support for empty nodes.
+			 * Allow for space in "]["
 			 */
 		
 			var level_height = 50;
@@ -20,16 +21,18 @@
 		
 			function go() {
 				var ctx = document.getElementById('canvas').getContext('2d');
-				var width = ctx.canvas.width;
-				var height = ctx.canvas.height;
 				ctx.textAlign = "center";
 				ctx.font = font_size + "pt " + font_style;
-				
 				var s = document.f.i.value;
 				var root = parse(s, ctx);
-				ctx.clearRect(0, 0, width, height);
 				set_widths(root, ctx);
 				find_height(root, 0);
+				var width = 1.1 * (root.left_width + root.right_width);
+				var height = (tree_height +1) * level_height * 1;
+				ctx.canvas.width = width;
+				ctx.canvas.height = height;
+				ctx.textAlign = "center";
+				ctx.font = font_size + "pt " + font_style;
 				ctx.translate(root.left_width + 20, 20 + font_size/2);
 				draw(root, ctx, 0, 0);
 				
@@ -163,6 +166,7 @@
 		</script>
 		
 		<center>
+			<h2>Syntax Tree Generator</h2>
 			<form name="f" onsubmit="go(); return false">
 				<input name="i" type="text" size="50" />
 				<input type="submit">
