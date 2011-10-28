@@ -1,0 +1,232 @@
+<html>
+	<head>
+		<title>Syntax Tree Generator</title>
+		<style type="text/css">
+		canvas { border: 1px solid ; background: white; visibility: hidden; }
+		</style>
+		
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-25344866-1']);
+			_gaq.push(['_trackPageview']);
+
+			(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+
+		<script type="text/javascript" src="base64.js"></script>
+		<script type="text/javascript" src="canvas2image.js"></script>
+		<script type="text/javascript">
+		
+			/* TODO:
+			 * Add support for empty nodes.
+			 * Options for font, font size, vertical spacing, horizontal spacing
+			 * Disable "save as" until submitted
+			 */
+		
+			var level_height;
+			var width_pad;
+			var font_size;
+			var font_style;
+			var tree_height = 0;
+			var ctx;
+		
+			function go() {
+				level_height = parseInt(document.f.vertspace.value);
+				width_pad = parseInt(document.f.horspace.value);
+				font_style = document.getElementById("fontstyle").value;
+				font_size = document.f.fontsize.value;
+				ctx = document.getElementById('canvas').getContext('2d');
+				ctx.textAlign = "center";
+				ctx.font = font_size + "pt " + font_style;
+				var s = document.f.i.value;
+				var root = parse(s, ctx);
+				set_widths(root, ctx);
+				find_height(root, 0);
+				var width = 1.2 * (root.left_width + root.right_width);
+				var height = (tree_height + 1) * level_height * 1;
+				ctx.canvas.width = width;
+				ctx.canvas.height = height;
+				ctx.fillStyle = "rgb(255, 255, 255)";
+				ctx.fillRect(0, 0, width, height)
+				ctx.fillStyle = "rgb(0, 0, 0)";
+				ctx.textAlign = "center";
+				ctx.font = font_size + "pt " + font_style;
+				ctx.translate(root.left_width + 0.1 * (root.left_width + root.right_width), 0.3 * (height / tree_height) + font_size/2);
+				draw(root, ctx, 0, 0);
+				ctx.canvas.style.visibility = "visible";
+				
+				/* debug
+				ctx.fillText(s.length, 20, 20);
+				ctx.fillText(JSON.stringify(root), 20, 40);
+				alert(JSON.stringify(root));
+				*/
+			}
+			
+			function parse(ss, ctx) {
+				var node = new Object();
+				node.children = new Array();
+				var cchild = 0;
+				
+				if ((ss[0] != "[") || (ss[ss.length - 1] != "]")) {
+					alert("Ill-formed.");
+					return 0;
+				}
+				
+				var start = 1;
+				while (ss[start] != " ") {
+					start++;
+				}
+				node.type = ss.substr(1, start-1);
+				start++;
+				
+				node.is_phrase = 0;
+				if ((node.type[node.type.length - 1] == "P") && (node.type.length != 1)) {
+					node.is_phrase = 1;
+				}
+				
+				if (ss[start] == "[") {
+					var current = start;
+					var cstart = start;
+					var level = 0;
+					node.width = 0;
+					while (current < ss.length - 1) {
+					
+						if (ss[current] == "[") {
+							level++;
+							if (level == 1) {
+								cstart = current;
+							}
+						}
+						
+						if (ss[current] == "]") {
+							level--;
+							if (level == 0) {
+								node.children[cchild] = parse(ss.substr(cstart, current - cstart + 1), ctx);
+								cchild++;
+							}
+						}
+						
+						current++;
+					}
+				} else {
+					node.text = ss.substr(start, ss.length - start - 1);
+				}
+				
+				return node;
+			}
+			
+			function set_widths(n, ctx) {
+			
+				var length = n.children.length;
+			
+				for (var i = 0; i < length; i++) {
+					set_widths(n.children[i], ctx);
+				}
+				
+				if ('text' in n) {
+					n.left_width = ctx.measureText(n.text).width / 2;
+					n.right_width = n.left_width;
+				} else {
+				
+					// Figure out how wide apart the children should be placed.
+					// The spacing between them should be equal.
+					n.step = 0;
+					for (var i = 0; i < length - 1; i++) {
+						var space = n.children[i].right_width + width_pad + n.children[i+1].left_width;
+						if (space > n.step) {
+							n.step = space;
+						}
+					}
+					
+					var sub = ((length - 1) / 2) * n.step;
+					n.left_width = sub + n.children[0].left_width;
+					n.right_width = sub + n.children[length-1].right_width;
+				}
+			}
+			
+			function find_height(n, h) {
+			
+				if ('text' in n) {h++;}
+				if (h > tree_height) {
+					tree_height = h;
+				}
+				
+				for (var i = 0; i < n.children.length; i++) {
+					find_height(n.children[i], h + 1);
+				}
+			}
+			
+			function draw(n, ctx, x, y) {
+				var length = n.children.length;
+				ctx.fillText(n.type, x, y);
+				if ('text' in n) {
+					ctx.fillText(n.text, x, y + level_height);
+					if (n.is_phrase) {
+						ctx.moveTo(x, y + font_size * 0.2);
+						ctx.lineTo(x - n.left_width, y + level_height - font_size * 1.2);
+						ctx.lineTo(x + n.right_width, y + level_height - font_size * 1.2);
+						ctx.lineTo(x, y + font_size * 0.2);
+						ctx.stroke();
+					} else {
+						ctx.moveTo(x, y + font_size * 0.2);
+						ctx.lineTo(x, y + level_height - font_size * 1.2);
+						ctx.stroke();
+					}
+				} else {
+					for (var i = 0; i < length; i++) {
+						var left_start = x - (n.step)*((length-1)/2);
+						draw(n.children[i], ctx, left_start + i*(n.step), y + level_height);
+						ctx.moveTo(x, y + font_size * 0.2);
+						ctx.lineTo(left_start + i*(n.step), y + level_height - font_size * 1.2);
+						ctx.stroke();
+					}
+				}
+			}
+			
+		</script>
+		<script type="text/javascript">
+			function fontSizeChange(value) {
+				document.getElementById("fontsize").innerHTML=value;
+				font_size = value;
+			}
+			
+			function vertSpaceChange(value) {
+				document.getElementById("vertspace").innerHTML=value;
+			}
+			
+			function horSpaceChange(value) {
+				document.getElementById("horspace").innerHTML=value;
+			}
+		</script>
+	</head>
+	<body>
+		<h2>Syntax Tree Generator</h2>
+		<a href="help.html">Help</a>  ---  
+		<a href="LICENSE">License</a>  ---  
+		Please send suggestions to mail@mshang.ca<br />
+		<form name="f">
+			<textarea name="i" rows="3" cols="50">[IP [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></br>
+			Font style: 
+			<select id="fontstyle">
+				<option value="serif">Serif</option>
+				<option value="sans-serif">Sans-serif</option>
+				<option value="monospace">Monospace</option>
+			</select><br />
+			Font size: <span id="fontsize">12</span>
+			<input type="range" name="fontsize" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"><br />
+			Vertical spacing: <span id="vertspace">50</span>
+			<input type="range" name="vertspace" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"><br />
+			Horizontal spacing: <span id="horspace">10</span>
+			<input type="range" name="horspace" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"><br />
+			<input type="button" value="Submit" onclick="go(); return false">
+			<input type="button" value="Save as PNG" onclick="Canvas2Image.saveAsPNG(ctx.canvas);">
+			<input type="button" value="Save as BMP" onclick="Canvas2Image.saveAsBMP(ctx.canvas);">
+			<input type="button" value="Save as JPEG" onclick="Canvas2Image.saveAsJPEG(ctx.canvas);">
+		</form>
+		<canvas id="canvas" width="0" height="0"></canvas><br />
+	</body>
+</html>
