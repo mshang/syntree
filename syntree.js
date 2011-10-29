@@ -1,6 +1,6 @@
 
 /* TODO:
- * Add support for empty nodes, i.e. [NP]
+ * 
  */
 
 var level_height;
@@ -51,8 +51,6 @@ function go() {
 	document.f.saveasjpeg.disabled = false;
 	
 	/* debug
-	ctx.fillText(s.length, 20, 20);
-	ctx.fillText(JSON.stringify(root), 20, 40);
 	alert(JSON.stringify(root));
 	*/
 }
@@ -68,24 +66,27 @@ function parse(ss, ctx) {
 	}
 	
 	var start = 1;
-	while ((ss[start] != " ") && (ss[start] != "[")) {
+	while ((ss[start] != " ") && (ss[start] != "[") && (ss[start] != "]")) {
 		start++;
 	}
-	node.type = ss.substr(1, start-1);
-	while (ss[start] == " ") {
-		start++;
+	if (ss[start] == "]") {
+		node.text = ss.substr(1, start-1);
+		return node;
 	}
 	
+	node.type = ss.substr(1, start-1);
 	node.is_phrase = 0;
 	if ((node.type[node.type.length - 1] == "P") && (node.type.length != 1)) {
 		node.is_phrase = 1;
+	}
+	while (ss[start] == " ") {
+		start++;
 	}
 	
 	if (ss[start] == "[") {
 		var current = start;
 		var cstart = start;
 		var level = 0;
-		node.width = 0;
 		while (current < ss.length - 1) {
 		
 			if (ss[current] == "[") {
@@ -155,27 +156,33 @@ function find_height(n, h) {
 
 function draw(n, ctx, x, y) {
 	var length = n.children.length;
-	ctx.fillText(n.type, x, y);
-	if ('text' in n) {
-		ctx.fillText(n.text, x, y + level_height);
-		if (n.is_phrase) {
-			ctx.moveTo(x, y + font_size * 0.2);
-			ctx.lineTo(x - n.left_width, y + level_height - font_size * 1.2);
-			ctx.lineTo(x + n.right_width, y + level_height - font_size * 1.2);
-			ctx.lineTo(x, y + font_size * 0.2);
-			ctx.stroke();
+	
+	if ('type' in n) {
+		ctx.fillText(n.type, x, y);
+		if ('text' in n) {
+			ctx.fillText(n.text, x, y + level_height);
+			if (n.is_phrase) {
+				ctx.moveTo(x, y + font_size * 0.2);
+				ctx.lineTo(x - n.left_width, y + level_height - font_size * 1.2);
+				ctx.lineTo(x + n.right_width, y + level_height - font_size * 1.2);
+				ctx.lineTo(x, y + font_size * 0.2);
+				ctx.stroke();
+			} else {
+				ctx.moveTo(x, y + font_size * 0.2);
+				ctx.lineTo(x, y + level_height - font_size * 1.2);
+				ctx.stroke();
+			}
 		} else {
-			ctx.moveTo(x, y + font_size * 0.2);
-			ctx.lineTo(x, y + level_height - font_size * 1.2);
-			ctx.stroke();
+			for (var i = 0; i < length; i++) {
+				var left_start = x - (n.step)*((length-1)/2);
+				draw(n.children[i], ctx, left_start + i*(n.step), y + level_height);
+				ctx.moveTo(x, y + font_size * 0.2);
+				ctx.lineTo(left_start + i*(n.step), y + level_height - font_size * 1.2);
+				ctx.stroke();
+			}
 		}
 	} else {
-		for (var i = 0; i < length; i++) {
-			var left_start = x - (n.step)*((length-1)/2);
-			draw(n.children[i], ctx, left_start + i*(n.step), y + level_height);
-			ctx.moveTo(x, y + font_size * 0.2);
-			ctx.lineTo(left_start + i*(n.step), y + level_height - font_size * 1.2);
-			ctx.stroke();
-		}
+		ctx.fillText(n.text, x, y);
 	}
+
 }
