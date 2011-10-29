@@ -40,7 +40,7 @@
 		<a href="LICENSE">License</a>  ---  
 		Please send suggestions to mail@mshang.ca<br />
 		<form name="f">
-			<textarea name="i" rows="3" cols="50">[IP [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></br>
+			<textarea name="i" rows="3" cols="50">[S [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></br>
 			Font style: 
 			<select id="fontstyle">
 				<option value="serif">Serif</option>
@@ -54,9 +54,9 @@
 			Horizontal spacing: <span id="horspace">10</span>
 			<input type="range" name="horspace" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"><br />
 			<input type="button" value="Submit" onclick="go(); return false">
-			<input type="button" value="Save as PNG" onclick="Canvas2Image.saveAsPNG(ctx.canvas);">
-			<input type="button" value="Save as BMP" onclick="Canvas2Image.saveAsBMP(ctx.canvas);">
-			<input type="button" value="Save as JPEG" onclick="Canvas2Image.saveAsJPEG(ctx.canvas);">
+			<input type="button" name="saveaspng" value="Save as PNG" onclick="Canvas2Image.saveAsPNG(ctx.canvas);" disabled="disabled">
+			<input type="button" name="saveasbmp"  value="Save as BMP" onclick="Canvas2Image.saveAsBMP(ctx.canvas);" disabled="disabled">
+			<input type="button" name="saveasjpeg"  value="Save as JPEG" onclick="Canvas2Image.saveAsJPEG(ctx.canvas);" disabled="disabled">
 		</form>
 		<canvas id="canvas" width="0" height="0"></canvas><br />
 	</body>

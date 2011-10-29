@@ -36,6 +36,11 @@ function go() {
 	draw(root, ctx, 0, 0);
 	ctx.canvas.style.visibility = "visible";
 	
+	// Enable "save as" buttons
+	document.f.saveaspng.disabled = false;
+	document.f.saveasbmp.disabled = false;
+	document.f.saveasjpeg.disabled = false;
+	
 	/* debug
 	ctx.fillText(s.length, 20, 20);
 	ctx.fillText(JSON.stringify(root), 20, 40);
