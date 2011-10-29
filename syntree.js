@@ -68,11 +68,13 @@ function parse(ss, ctx) {
 	}
 	
 	var start = 1;
-	while (ss[start] != " ") {
+	while ((ss[start] != " ") && (ss[start] != "[")) {
 		start++;
 	}
 	node.type = ss.substr(1, start-1);
-	start++;
+	while (ss[start] == " ") {
+		start++;
+	}
 	
 	node.is_phrase = 0;
 	if ((node.type[node.type.length - 1] == "P") && (node.type.length != 1)) {
