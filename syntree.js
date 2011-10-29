@@ -1,7 +1,6 @@
 
 /* TODO:
  * Add support for empty nodes, i.e. [NP]
- * Disable "save as" until submitted
  */
 
 var level_height;
@@ -12,21 +11,31 @@ var tree_height = 0;
 var ctx;
 
 function go() {
+
+	// Initialize the various options.
 	level_height = parseInt(document.f.vertspace.value);
 	width_pad = parseInt(document.f.horspace.value);
 	font_style = document.getElementById("fontstyle").value;
 	font_size = document.f.fontsize.value;
+	
+	// Initialize the canvas. TODO: make this degrade gracefully.
 	ctx = document.getElementById('canvas').getContext('2d');
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
+	
+	// Get the string and parse it.
 	var s = document.f.i.value;
 	var root = parse(s, ctx);
+	
+	// Find out dimensions of the tree and set the size of the canvas to suit.
 	set_widths(root, ctx);
 	find_height(root, 0);
 	var width = 1.2 * (root.left_width + root.right_width);
 	var height = (tree_height + 1) * level_height * 1;
 	ctx.canvas.width = width;
 	ctx.canvas.height = height;
+	
+	// Set various styles. Recursively draw.
 	ctx.fillStyle = "rgb(255, 255, 255)";
 	ctx.fillRect(0, 0, width, height)
 	ctx.fillStyle = "rgb(0, 0, 0)";
