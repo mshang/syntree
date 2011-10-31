@@ -32,28 +32,26 @@
 					<td>Please send suggestions to mail@mshang.ca</td>
 				</tr>
 				<form name="f">
-					<tr><th colspan="3"><textarea name="i" rows="3" cols="50">[S [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></th></tr>
+					<tr><th colspan="3"><textarea name="i" rows="3" cols="50" style="width:100%">[S [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></th></tr>
 					<tr>
 						<td colspan="2">Font style:</td>
 						<td align="right">
-							<select id="fontstyle">
-								<option value="serif">Serif</option>
-								<option value="sans-serif">Sans-serif</option>
-								<option value="monospace">Monospace</option>
-							</select>
+							<input type="radio" name="fontstyle" value="serif" checked />Serif
+							<input type="radio" name="fontstyle" value="sans-serif" />Sans-Serif
+							<input type="radio" name="fontstyle" value="monospace" />Monospace
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">Font size:</td>
-						<td align="right"><input type="range" name="fontsize" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"></td>
+						<td align="right"><input type="range" name="fontsize" style="width:100%" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"></td>
 					</tr>
 					<tr>
 						<td colspan="2">Vertical spacing:</td>
-						<td align="right"><input type="range" name="vertspace" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"></td>
+						<td align="right"><input type="range" name="vertspace" style="width:100%" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"></td>
 					</tr>
 					<tr>
 						<td colspan="2">Horizontal spacing:</td>
-						<td align="right"><input type="range" name="horspace" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"></td>
+						<td align="right"><input type="range" name="horspace" style="width:100%" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"></td>
 					</tr>
 					<tr><td colspan="3" align="center">
 						<input type="button" value="Submit" onclick="go(); return false">

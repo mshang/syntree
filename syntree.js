@@ -20,8 +20,10 @@ function go() {
 	// Initialize the various options.
 	level_height = parseInt(document.f.vertspace.value);
 	width_pad = parseInt(document.f.horspace.value);
-	font_style = document.getElementById("fontstyle").value;
 	font_size = document.f.fontsize.value;
+	for (var i = 0; i < 3; i++) {
+		if (document.f.fontstyle[i].checked) font_style = document.f.fontstyle[i].value;
+	}
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
 	ctx = document.getElementById('canvas').getContext('2d');
