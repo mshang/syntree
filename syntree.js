@@ -2,14 +2,13 @@
 /* TODO:
  * Spaces between brackets should be ignored.
  * Multiple spaces should be condensed to one space.
- * Rename level_height and width_pad to vertical and horizontal spacing.
  * Read is_phrase attribute to draw triangles.
  * Check well-formedness of XML.
  * There are many redundancies between XML and square bracket format.
  */
 
-var level_height;
-var width_pad;
+var vert_space;
+var hor_space;
 var font_size;
 var font_style;
 var tree_height = 0;
@@ -18,8 +17,8 @@ var ctx;
 function go() {
 
 	// Initialize the various options.
-	level_height = parseInt(document.f.vertspace.value);
-	width_pad = parseInt(document.f.horspace.value);
+	vert_space = parseInt(document.f.vertspace.value);
+	hor_space = parseInt(document.f.horspace.value);
 	font_size = document.f.fontsize.value;
 	for (var i = 0; i < 3; i++) {
 		if (document.f.fontstyle[i].checked) font_style = document.f.fontstyle[i].value;
@@ -39,7 +38,7 @@ function go() {
 		set_widths(root);
 		find_height(root, 0);
 		var width = 1.2 * (root.left_width + root.right_width);
-		var height = (tree_height + 1) * level_height * 1;
+		var height = (tree_height + 1) * vert_space * 1;
 		ctx.canvas.width = width;
 		ctx.canvas.height = height;
 		
@@ -65,7 +64,7 @@ function go() {
 		root.set_widths_xml();
 		root.find_height_xml(0);
 		var width = 1.2 * (root.left_width + root.right_width);
-		var height = (tree_height + 1) * level_height * 1;
+		var height = (tree_height + 1) * vert_space * 1;
 		ctx.canvas.width = width;
 		ctx.canvas.height = height;
 		
@@ -183,7 +182,7 @@ function set_widths(n) {
 		// The spacing between them should be equal.
 		n.step = 0;
 		for (var i = 0; i < length - 1; i++) {
-			var space = n.children[i].right_width + width_pad + n.children[i+1].left_width;
+			var space = n.children[i].right_width + hor_space + n.children[i+1].left_width;
 			if (space > n.step) {
 				n.step = space;
 			}
@@ -210,7 +209,7 @@ function set_widths_xml() {
 		for (var i = 0, current = this.firstChild;
 				i < this.childNodes.length - 1; 
 				i++, current = current.nextSibling) {
-			var space = current.right_width + width_pad + current.nextSibling.left_width;
+			var space = current.right_width + hor_space + current.nextSibling.left_width;
 			if (space > this.step) {
 				this.step = space;
 			}
@@ -258,24 +257,24 @@ function draw(n, x, y) {
 	if ('type' in n) {
 		ctx.fillText(n.type, x, y);
 		if ('text' in n) {
-			ctx.fillText(n.text, x, y + level_height);
+			ctx.fillText(n.text, x, y + vert_space);
 			if (n.is_phrase) {
 				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(x - n.left_width, y + level_height - font_size * 1.2);
-				ctx.lineTo(x + n.right_width, y + level_height - font_size * 1.2);
+				ctx.lineTo(x - n.left_width, y + vert_space - font_size * 1.2);
+				ctx.lineTo(x + n.right_width, y + vert_space - font_size * 1.2);
 				ctx.lineTo(x, y + font_size * 0.2);
 				ctx.stroke();
 			} else {
 				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(x, y + level_height - font_size * 1.2);
+				ctx.lineTo(x, y + vert_space - font_size * 1.2);
 				ctx.stroke();
 			}
 		} else {
 			for (var i = 0; i < length; i++) {
 				var left_start = x - (n.step)*((length-1)/2);
-				draw(n.children[i], left_start + i*(n.step), y + level_height);
+				draw(n.children[i], left_start + i*(n.step), y + vert_space);
 				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(left_start + i*(n.step), y + level_height - font_size * 1.2);
+				ctx.lineTo(left_start + i*(n.step), y + vert_space - font_size * 1.2);
 				ctx.stroke();
 			}
 		}
@@ -292,7 +291,7 @@ function draw_xml(x, y) {
 				i < this.childNodes.length; 
 				i++, current = current.nextSibling) {
 			var left_start = x - (this.step)*((this.childNodes.length-1)/2);
-			current.draw_xml(left_start + i*(this.step), y + level_height);
+			current.draw_xml(left_start + i*(this.step), y + vert_space);
 		}
 		
 		// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
@@ -300,8 +299,8 @@ function draw_xml(x, y) {
 				&& (this.firstChild.nodeType == 3)
 				&& (this.is_phrase)) {
 			ctx.moveTo(x, y + font_size * 0.2);
-			ctx.lineTo(x - this.left_width, y + level_height - font_size * 1.2);
-			ctx.lineTo(x + this.right_width, y + level_height - font_size * 1.2);
+			ctx.lineTo(x - this.left_width, y + vert_space - font_size * 1.2);
+			ctx.lineTo(x + this.right_width, y + vert_space - font_size * 1.2);
 			ctx.lineTo(x, y + font_size * 0.2);
 			ctx.stroke();
 		} else { // Draw lines to all children
@@ -310,7 +309,7 @@ function draw_xml(x, y) {
 					i++, current = current.nextSibling) {
 				var left_start = x - (this.step)*((this.childNodes.length-1)/2);
 				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(left_start + i*(this.step), y + level_height - font_size * 1.2);
+				ctx.lineTo(left_start + i*(this.step), y + vert_space - font_size * 1.2);
 				ctx.stroke();
 			}
 		}
