@@ -22,38 +22,36 @@
 		<script type="text/javascript" src="jquery.js"></script>
 		<script type="text/javascript" src="syntree.js"></script>
 	</head>
-	<body>
+	<body style="background-color:AntiqueWhite">
 		<center>
 			<table border="0">
-				<tr><th colspan="3" style="font-size:24px">Syntax Tree Generator</th></tr>
+				<tr><th colspan="5" style="font-size:24px">Syntax Tree Generator</th></tr>
 				<tr>
 					<td><a href="help.html">Help</a></td>
 					<td><a href="LICENSE">License</a></td>
-					<td>Please send suggestions to mail@mshang.ca</td>
+					<td colspan="3">Please send suggestions to mail@mshang.ca</td>
 				</tr>
 				<form name="f">
-					<tr><th colspan="3"><textarea name="i" rows="3" cols="50" style="width:100%">[S [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></th></tr>
+					<tr><th colspan="5"><textarea name="i" rows="3" cols="50" style="width:100%">[S [NP Miles] [VP [V ate] [NP all the hot dogs]]]</textarea></th></tr>
 					<tr>
 						<td colspan="2">Font style:</td>
-						<td align="right">
-							<input type="radio" name="fontstyle" value="serif" checked />Serif
-							<input type="radio" name="fontstyle" value="sans-serif" />Sans-Serif
-							<input type="radio" name="fontstyle" value="monospace" />Monospace
-						</td>
+						<td><input type="radio" name="fontstyle" value="serif" checked />Serif</td>
+						<td><input type="radio" name="fontstyle" value="sans-serif" />Sans-Serif</td>
+						<td><input type="radio" name="fontstyle" value="monospace" />Monospace</td>
 					</tr>
 					<tr>
 						<td colspan="2">Font size:</td>
-						<td align="right"><input type="range" name="fontsize" style="width:100%" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"></td>
+						<td align="right" colspan="3"><input type="range" name="fontsize" style="width:100%" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"></td>
 					</tr>
 					<tr>
 						<td colspan="2">Vertical spacing:</td>
-						<td align="right"><input type="range" name="vertspace" style="width:100%" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"></td>
+						<td align="right" colspan="3"><input type="range" name="vertspace" style="width:100%" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"></td>
 					</tr>
 					<tr>
 						<td colspan="2">Horizontal spacing:</td>
-						<td align="right"><input type="range" name="horspace" style="width:100%" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"></td>
+						<td align="right" colspan="3"><input type="range" name="horspace" style="width:100%" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"></td>
 					</tr>
-					<tr><td colspan="3" align="center">
+					<tr><td colspan="5" align="center">
 						<input type="button" value="Submit" onclick="go(); return false">
 						<input type="button" name="saveaspng" value="Save as PNG" onclick="Canvas2Image.saveAsPNG(ctx.canvas);" disabled="disabled">
 						<input type="button" name="saveasbmp"  value="Save as BMP" onclick="Canvas2Image.saveAsBMP(ctx.canvas);" disabled="disabled">
@@ -61,7 +59,7 @@
 					</td></tr>
 				</form>
 			
-				<tr><td colspan="3" align="center"><canvas id="canvas" width="0" height="0"></canvas></td></tr>
+				<tr><td colspan="5" align="center"><canvas id="canvas" width="0" height="0"></canvas></td></tr>
 			</table>
 		</center>
 	</body>
