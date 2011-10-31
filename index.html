@@ -21,19 +21,6 @@
 		<script type="text/javascript" src="canvas2image.js"></script>
 		<script type="text/javascript" src="jquery.js"></script>
 		<script type="text/javascript" src="syntree.js"></script>
-		<script type="text/javascript">
-			function fontSizeChange(value) {
-				document.getElementById("fontsize").innerHTML=value;
-			}
-			
-			function vertSpaceChange(value) {
-				document.getElementById("vertspace").innerHTML=value;
-			}
-			
-			function horSpaceChange(value) {
-				document.getElementById("horspace").innerHTML=value;
-			}
-		</script>
 	</head>
 	<body>
 		<h2>Syntax Tree Generator</h2>
@@ -48,11 +35,11 @@
 				<option value="sans-serif">Sans-serif</option>
 				<option value="monospace">Monospace</option>
 			</select><br />
-			Font size: <span id="fontsize">12</span>
+			Font size:
 			<input type="range" name="fontsize" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"><br />
-			Vertical spacing: <span id="vertspace">50</span>
+			Vertical spacing:
 			<input type="range" name="vertspace" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"><br />
-			Horizontal spacing: <span id="horspace">10</span>
+			Horizontal spacing:
 			<input type="range" name="horspace" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"><br />
 			<input type="button" value="Submit" onclick="go(); return false">
 			<input type="button" name="saveaspng" value="Save as PNG" onclick="Canvas2Image.saveAsPNG(ctx.canvas);" disabled="disabled">

@@ -2,10 +2,10 @@
 /* TODO:
  * Spaces between brackets should be ignored.
  * Multiple spaces should be condensed to one space.
- * Get rid of slider updater.
  * Rename level_height and width_pad to vertical and horizontal spacing.
  * Read is_phrase attribute to draw triangles.
  * Check well-formedness of XML.
+ * There are many redundancies between XML and square bracket format.
  */
 
 var level_height;
