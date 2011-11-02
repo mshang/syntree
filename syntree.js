@@ -5,6 +5,12 @@
  * Read is_phrase attribute to draw triangles.
  * Check well-formedness of XML.
  * There are many redundancies between XML and square bracket format.
+ * Escape characters for "<", ">", "[", and "]"
+ *
+ * Plan:
+ * Transform square bracket notation to XML,
+ * Remove all spaces before and after "<" and ">"
+ * 
  */
 
 var vert_space;
@@ -44,7 +50,7 @@ function go() {
 		
 		// Set various styles. Recursively draw.
 		ctx.fillStyle = "rgb(255, 255, 255)";
-		ctx.fillRect(0, 0, width, height)
+		ctx.fillRect(0, 0, width, height);
 		ctx.fillStyle = "rgb(0, 0, 0)";
 		ctx.textAlign = "center";
 		ctx.font = font_size + "pt " + font_style;
@@ -53,7 +59,9 @@ function go() {
 		ctx.canvas.style.visibility = "visible";
 		
 	} else if (s[0] == "<") {
-		var xml = $.parseXML(s);
+		try{ var xml = $.parseXML(s); } catch(err) {
+			alert("Ill-formed XML");
+		}
 		var root = xml.documentElement;
 		Node.prototype.check_phrase_xml = check_phrase_xml;
 		Node.prototype.set_widths_xml = set_widths_xml;
@@ -70,7 +78,7 @@ function go() {
 		
 		// Set various styles. Recursively draw.
 		ctx.fillStyle = "rgb(255, 255, 255)";
-		ctx.fillRect(0, 0, width, height)
+		ctx.fillRect(0, 0, width, height);
 		ctx.fillStyle = "rgb(0, 0, 0)";
 		ctx.textAlign = "center";
 		ctx.font = font_size + "pt " + font_style;
