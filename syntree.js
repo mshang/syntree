@@ -5,7 +5,9 @@
  * Read is_phrase attribute to draw triangles.
  * Check well-formedness of XML.
  * There are many redundancies between XML and square bracket format.
- * Escape characters for "<", ">", "[", and "]"
+ * Escape characters for "<", ">", "[", "]", " ", in both tag names and data.
+ * Subscripts.
+ * Support for "<NP></NP>" in XML.
  *
  * Plan:
  * Transform square bracket notation to XML,
@@ -31,6 +33,7 @@ function go() {
 	}
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
+	// We need to set font options so that measureText works properly.
 	ctx = document.getElementById('canvas').getContext('2d');
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
@@ -45,16 +48,7 @@ function go() {
 		find_height(root, 0);
 		var width = 1.2 * (root.left_width + root.right_width);
 		var height = (tree_height + 1) * vert_space * 1;
-		ctx.canvas.width = width;
-		ctx.canvas.height = height;
-		
-		// Set various styles. Recursively draw.
-		ctx.fillStyle = "rgb(255, 255, 255)";
-		ctx.fillRect(0, 0, width, height);
-		ctx.fillStyle = "rgb(0, 0, 0)";
-		ctx.textAlign = "center";
-		ctx.font = font_size + "pt " + font_style;
-		ctx.translate(root.left_width + 0.1 * (root.left_width + root.right_width), 0.3 * (height / tree_height) + font_size/2);
+		clear(root, width, height);
 		draw(root, 0, 0);
 		
 	} else if (s[0] == "<") {
@@ -72,16 +66,7 @@ function go() {
 		root.find_height_xml(0);
 		var width = 1.2 * (root.left_width + root.right_width);
 		var height = (tree_height + 1) * vert_space * 1;
-		ctx.canvas.width = width;
-		ctx.canvas.height = height;
-		
-		// Set various styles. Recursively draw.
-		ctx.fillStyle = "rgb(255, 255, 255)";
-		ctx.fillRect(0, 0, width, height);
-		ctx.fillStyle = "rgb(0, 0, 0)";
-		ctx.textAlign = "center";
-		ctx.font = font_size + "pt " + font_style;
-		ctx.translate(root.left_width + 0.1 * (root.left_width + root.right_width), 0.3 * (height / tree_height) + font_size/2);
+		clear(root, width, height);
 		root.draw_xml(0, 0);
 		
 	} else {
@@ -98,6 +83,23 @@ function go() {
 	/* debug
 	alert(JSON.stringify(root));
 	*/
+}
+
+function clear(root, width, height) {
+	var canvas = document.createElement("canvas");
+	canvas.id = "canvas";
+	canvas.width = width;
+	canvas.height = height;
+	ctx.canvas.parentNode.replaceChild(canvas, ctx.canvas);
+	ctx = canvas.getContext('2d');
+	ctx.fillStyle = "rgb(255, 255, 255)";
+	ctx.fillRect(0, 0, width, height);
+	ctx.fillStyle = "rgb(0, 0, 0)";
+	ctx.textAlign = "center";
+	ctx.font = font_size + "pt " + font_style;
+	var x_shift = root.left_width + 0.1 * (root.left_width + root.right_width);
+	var y_shift = 0.3 * (height / tree_height) + font_size/2;
+	ctx.translate(x_shift, y_shift);
 }
 
 function check_phrase_xml() {
