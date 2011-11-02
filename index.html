@@ -2,7 +2,7 @@
 	<head>
 		<title>Syntax Tree Generator</title>
 		<style type="text/css">
-		canvas { border: 1px solid ; background: white; visibility: hidden; }
+		canvas { border: 1px solid ; background: white; }
 		</style>
 		
 		<script type="text/javascript">
@@ -53,13 +53,11 @@
 					</tr>
 					<tr><td colspan="5" align="center">
 						<input type="button" value="Submit" onclick="go(); return false">
-						<input type="button" name="saveaspng" value="Save as PNG" onclick="Canvas2Image.saveAsPNG(ctx.canvas);" disabled="disabled">
-						<input type="button" name="saveasbmp"  value="Save as BMP" onclick="Canvas2Image.saveAsBMP(ctx.canvas);" disabled="disabled">
-						<input type="button" name="saveasjpeg"  value="Save as JPEG" onclick="Canvas2Image.saveAsJPEG(ctx.canvas);" disabled="disabled">
 					</td></tr>
 				</form>
 			
-				<tr><td colspan="5" align="center"><canvas id="canvas" width="0" height="0"></canvas></td></tr>
+				<tr style="display:none"><td colspan="5" align="center"><canvas id="canvas" width="0" height="0"></canvas></td></tr>
+				<tr><td colspan="5" align="center"><img id="treeimg" /></td></tr>
 			</table>
 		</center>
 	</body>

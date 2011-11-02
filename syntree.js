@@ -56,7 +56,6 @@ function go() {
 		ctx.font = font_size + "pt " + font_style;
 		ctx.translate(root.left_width + 0.1 * (root.left_width + root.right_width), 0.3 * (height / tree_height) + font_size/2);
 		draw(root, 0, 0);
-		ctx.canvas.style.visibility = "visible";
 		
 	} else if (s[0] == "<") {
 		try{ var xml = $.parseXML(s); } catch(err) {
@@ -84,16 +83,17 @@ function go() {
 		ctx.font = font_size + "pt " + font_style;
 		ctx.translate(root.left_width + 0.1 * (root.left_width + root.right_width), 0.3 * (height / tree_height) + font_size/2);
 		root.draw_xml(0, 0);
-		ctx.canvas.style.visibility = "visible";
 		
 	} else {
 		alert("Ill-formed. Input must start with a bracket.");
 	}
-		
-	// Enable "save as" buttons
-	document.f.saveaspng.disabled = false;
-	document.f.saveasbmp.disabled = false;
-	document.f.saveasjpeg.disabled = false;
+	
+	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
+	new_img.id = "treeimg";
+	new_img.border = "1";
+	var old_img = document.getElementById('treeimg');
+	old_img.parentNode.replaceChild(new_img, old_img);
+	ctx.canvas.style.display = "none";
 	
 	/* debug
 	alert(JSON.stringify(root));
