@@ -133,21 +133,6 @@ function test_alpha(ch) {
 	return (ch.search(/\w/) != -1);
 }
 
-function check_phrase() {
-	this.is_phrase = 0;
-	if (this.nodeType == 1) {
-		if ((this.nodeName[this.nodeName.length - 1] == "P")
-				&& (this.nodeName.length != 1)) {
-			this.is_phrase = 1;
-		}
-		for (var i = 0, current = this.firstChild;
-				i < this.childNodes.length; 
-				i++, current = current.nextSibling) {
-			current.check_phrase();
-		}
-	}
-}
-
 function remove_spaces(str) {
 	for (var i = 0; i < str.length; i++) {
 		if (str[i] == ">") {
@@ -170,9 +155,30 @@ function remove_spaces(str) {
 	return str;
 }
 
+function check_phrase() {
+	this.is_phrase = 0;
+	if (this.nodeType == 1) {
+		if ((this.nodeName[this.nodeName.length - 1] == "P")
+				&& (this.nodeName.length != 1)) {
+			this.is_phrase = 1;
+		}
+		for (var i = 0, current = this.firstChild;
+				i < this.childNodes.length; 
+				i++, current = current.nextSibling) {
+			current.check_phrase();
+		}
+	}
+}
+
 function set_widths() {
 	switch(this.nodeType) {
 	case 1:
+		if (this.childNodes.length == 0) { // I am a node with no data, e.g. <NP></NP>
+			this.left_width = ctx.measureText(this.nodeName).width / 2;
+			this.right_width = this.left_width;
+			break;
+		}
+		
 		for (var i = 0, current = this.firstChild;
 				i < this.childNodes.length; 
 				i++, current = current.nextSibling) {
