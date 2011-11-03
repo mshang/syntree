@@ -1,20 +1,13 @@
 
 /* TODO:
- * Spaces between brackets should be ignored.
- * Multiple spaces should be condensed to one space.
  * Read is_phrase attribute to draw triangles.
  * Check well-formedness of XML.
- * There are many redundancies between XML and square bracket format.
  * Escape characters for "<", ">", "[", "]", " ", in both tag names and data.
  * Subscripts.
  * Support for "<NP></NP>" in XML.
  * Exceptions for ill-formed.
  * remove_spaces, replace and square_to_xml should be prototype methods of string, called with dot.
  * Note in help file that there must be a space between "[NP" and data.
- *
- * Plan:
- * Transform square bracket notation to XML,
- * Remove all spaces before and after "<" and ">"
  * 
  */
 
@@ -52,18 +45,18 @@ function go() {
 			alert("Ill-formed XML");
 		}
 		var root = xml.documentElement;
-		Node.prototype.check_phrase_xml = check_phrase_xml;
-		Node.prototype.set_widths_xml = set_widths_xml;
-		Node.prototype.find_height_xml = find_height_xml;
-		Node.prototype.draw_xml = draw_xml;
+		Node.prototype.check_phrase = check_phrase;
+		Node.prototype.set_widths = set_widths;
+		Node.prototype.find_height = find_height;
+		Node.prototype.draw = draw;
 		
-		root.check_phrase_xml();
-		root.set_widths_xml();
-		root.find_height_xml(0);
+		root.check_phrase();
+		root.set_widths();
+		root.find_height(0);
 		var width = 1.2 * (root.left_width + root.right_width);
 		var height = (tree_height + 1) * vert_space * 1;
 		clear(root, width, height);
-		root.draw_xml(0, 0);
+		root.draw(0, 0);
 		
 	} else {
 		alert("Ill-formed. Input must start with a bracket.");
@@ -140,7 +133,7 @@ function test_alpha(ch) {
 	return (ch.search(/\w/) != -1);
 }
 
-function check_phrase_xml() {
+function check_phrase() {
 	this.is_phrase = 0;
 	if (this.nodeType == 1) {
 		if ((this.nodeName[this.nodeName.length - 1] == "P")
@@ -150,7 +143,7 @@ function check_phrase_xml() {
 		for (var i = 0, current = this.firstChild;
 				i < this.childNodes.length; 
 				i++, current = current.nextSibling) {
-			current.check_phrase_xml();
+			current.check_phrase();
 		}
 	}
 }
@@ -177,13 +170,13 @@ function remove_spaces(str) {
 	return str;
 }
 
-function set_widths_xml() {
+function set_widths() {
 	switch(this.nodeType) {
 	case 1:
 		for (var i = 0, current = this.firstChild;
 				i < this.childNodes.length; 
 				i++, current = current.nextSibling) {
-			current.set_widths_xml();
+			current.set_widths();
 		}
 		
 		// Figure out how wide apart the children should be placed.
@@ -210,7 +203,7 @@ function set_widths_xml() {
 	}
 }
 
-function find_height_xml(h) {
+function find_height(h) {
 	if (h > tree_height) {
 		tree_height = h;
 	}
@@ -218,11 +211,11 @@ function find_height_xml(h) {
 	for (var i = 0, current = this.firstChild;
 			i < this.childNodes.length; 
 			i++, current = current.nextSibling) {
-		current.find_height_xml(h+1);
+		current.find_height(h+1);
 	}
 }
 
-function draw_xml(x, y) {
+function draw(x, y) {
 	switch (this.nodeType) {
 	case 1:
 		ctx.fillText(this.nodeName, x, y);
@@ -230,7 +223,7 @@ function draw_xml(x, y) {
 				i < this.childNodes.length; 
 				i++, current = current.nextSibling) {
 			var left_start = x - (this.step)*((this.childNodes.length-1)/2);
-			current.draw_xml(left_start + i*(this.step), y + vert_space);
+			current.draw(left_start + i*(this.step), y + vert_space);
 		}
 		
 		// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
