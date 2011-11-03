@@ -8,6 +8,9 @@
  * Escape characters for "<", ">", "[", "]", " ", in both tag names and data.
  * Subscripts.
  * Support for "<NP></NP>" in XML.
+ * Exceptions for ill-formed.
+ * remove_spaces, replace and square_to_xml should be prototype methods of string, called with dot.
+ * Note in help file that there must be a space between "[NP" and data.
  *
  * Plan:
  * Transform square bracket notation to XML,
@@ -39,20 +42,13 @@ function go() {
 	ctx.font = font_size + "pt " + font_style;
 	
 	// Get the string and parse it.
-	var s = document.f.i.value;
-	if (s[0] == "[") {
-		var root = parse(s, ctx);
-	
-		// Find out dimensions of the tree and set the size of the canvas to suit.
-		set_widths(root);
-		find_height(root, 0);
-		var width = 1.2 * (root.left_width + root.right_width);
-		var height = (tree_height + 1) * vert_space * 1;
-		clear(root, width, height);
-		draw(root, 0, 0);
+	var str = document.f.i.value;
+	if (str[0] == "[") {
+		str = remove_spaces(square_to_xml(str));
+	}
 		
-	} else if (s[0] == "<") {
-		try{ var xml = $.parseXML(s); } catch(err) {
+	if (str[0] == "<") {
+		try{ var xml = $.parseXML(str); } catch(err) {
 			alert("Ill-formed XML");
 		}
 		var root = xml.documentElement;
@@ -100,6 +96,48 @@ function clear(root, width, height) {
 	var x_shift = root.left_width + 0.1 * (root.left_width + root.right_width);
 	var y_shift = 0.3 * (height / tree_height) + font_size/2;
 	ctx.translate(x_shift, y_shift);
+	// Ready to draw.
+}
+
+function square_to_xml(str) {
+	for (var i = 0; i < str.length; i++) {
+		if (str[i] == "[") {
+			var j = i + 1;
+			while (test_alpha(str[j])) {
+				j++;
+			}
+			if (j == i + 1) {
+				alert("Ill-formed.");
+				return 0;
+			}
+			var cat = str.substring(i+1, j)
+			str = replace(str, i, j, "<" + cat + ">");
+			
+			var level = 1;
+			for (j = i + 1; j < str.length; j++) {
+				if (str[j] == "[") {
+					level++;
+				} else if (str[j] == "]") {
+					level--;
+					if (level == 0) {
+						// Do stuff.
+						str = replace(str, j, j+1, "</" + cat + ">");
+						break;
+					}
+				}
+			}
+		}
+	}
+	return str;
+}
+
+function replace(str, from, to, ins) {
+	// Character at position "from" will not be in the output, "to" will.
+	return str.substring(0, from) + ins + str.substring(to);
+}
+
+function test_alpha(ch) {
+	return (ch.search(/\w/) != -1);
 }
 
 function check_phrase_xml() {
@@ -117,91 +155,26 @@ function check_phrase_xml() {
 	}
 }
 
-function parse(ss, ctx) {
-	var node = new Object();
-	node.children = new Array();
-	var cchild = 0;
-	
-	if ((ss[0] != "[") || (ss[ss.length - 1] != "]")) {
-		alert("Ill-formed.");
-		return 0;
-	}
-	
-	var start = 1;
-	while ((ss[start] != " ") && (ss[start] != "[") && (ss[start] != "]")) {
-		start++;
-	}
-	if (ss[start] == "]") {
-		node.text = ss.substr(1, start-1);
-		return node;
-	}
-	
-	node.type = ss.substr(1, start-1);
-	node.is_phrase = 0;
-	if ((node.type[node.type.length - 1] == "P") && (node.type.length != 1)) {
-		node.is_phrase = 1;
-	}
-	while (ss[start] == " ") {
-		start++;
-	}
-	
-	if (ss[start] == "[") {
-		var current = start;
-		var cstart = start;
-		var level = 0;
-		while (current < ss.length - 1) {
-		
-			if (ss[current] == "[") {
-				level++;
-				if (level == 1) {
-					cstart = current;
-				}
-			}
-			
-			if (ss[current] == "]") {
-				level--;
-				if (level == 0) {
-					node.children[cchild] = parse(ss.substr(cstart, current - cstart + 1), ctx);
-					cchild++;
-				}
-			}
-			
-			current++;
-		}
-	} else {
-		node.text = ss.substr(start, ss.length - start - 1);
-	}
-	
-	return node;
-}
-
-function set_widths(n) {
-
-	var length = n.children.length;
-
-	for (var i = 0; i < length; i++) {
-		set_widths(n.children[i]);
-	}
-	
-	if ('text' in n) {
-		n.left_width = ctx.measureText(n.text).width / 2;
-		n.right_width = n.left_width;
-	} else {
-	
-		// Figure out how wide apart the children should be placed.
-		// The spacing between them should be equal.
-		n.step = 0;
-		for (var i = 0; i < length - 1; i++) {
-			var space = n.children[i].right_width + hor_space + n.children[i+1].left_width;
-			if (space > n.step) {
-				n.step = space;
+function remove_spaces(str) {
+	for (var i = 0; i < str.length; i++) {
+		if (str[i] == ">") {
+			var j = i + 1;
+			while (str[j] == " ") {
+				str = str.substring(0, j) + str.substring(j + 1);
+				j++;
 			}
 		}
-		
-		var sub = ((length - 1) / 2) * n.step;
-		n.left_width = sub + n.children[0].left_width;
-		n.right_width = sub + n.children[length-1].right_width;
 	}
+
+	for (var i = str.length-1; i < 0; i--) {
+		if (str[i] == "<") {
+			while (str[i-1] == " ") {
+				str = str.substring(0, i-2) + str.substring(i-1);
+				i--;
+			}
+		}
+	}
+	return str;
 }
 
 function set_widths_xml() {
@@ -237,18 +210,6 @@ function set_widths_xml() {
 	}
 }
 
-function find_height(n, h) {
-
-	if ('text' in n) {h++;}
-	if (h > tree_height) {
-		tree_height = h;
-	}
-	
-	for (var i = 0; i < n.children.length; i++) {
-		find_height(n.children[i], h + 1);
-	}
-}
-
 function find_height_xml(h) {
 	if (h > tree_height) {
 		tree_height = h;
@@ -258,38 +219,6 @@ function find_height_xml(h) {
 			i < this.childNodes.length; 
 			i++, current = current.nextSibling) {
 		current.find_height_xml(h+1);
-	}
-}
-
-function draw(n, x, y) {
-	var length = n.children.length;
-	
-	if ('type' in n) {
-		ctx.fillText(n.type, x, y);
-		if ('text' in n) {
-			ctx.fillText(n.text, x, y + vert_space);
-			if (n.is_phrase) {
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(x - n.left_width, y + vert_space - font_size * 1.2);
-				ctx.lineTo(x + n.right_width, y + vert_space - font_size * 1.2);
-				ctx.lineTo(x, y + font_size * 0.2);
-				ctx.stroke();
-			} else {
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(x, y + vert_space - font_size * 1.2);
-				ctx.stroke();
-			}
-		} else {
-			for (var i = 0; i < length; i++) {
-				var left_start = x - (n.step)*((length-1)/2);
-				draw(n.children[i], left_start + i*(n.step), y + vert_space);
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(left_start + i*(n.step), y + vert_space - font_size * 1.2);
-				ctx.stroke();
-			}
-		}
-	} else {
-		ctx.fillText(n.text, x, y);
 	}
 }
 
