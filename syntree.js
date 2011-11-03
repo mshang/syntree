@@ -8,6 +8,8 @@
  * Exceptions for ill-formed.
  * remove_spaces, replace and square_to_xml should be prototype methods of string, called with dot.
  * Note in help file that there must be a space between "[NP" and data.
+ * Height resizing doesn't work.
+ * Apostrophes don't work.
  * 
  */
 
