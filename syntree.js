@@ -10,6 +10,12 @@
  * Note in help file that there must be a space between "[NP" and data.
  * Height resizing doesn't work.
  * Apostrophes don't work.
+ * Draw as you type.
+ *
+ * In order to deal with apostrophes, spaces, brackets, and other non-alphanumeric charaters in tag names,
+ * make a text preprocessor which will transform anything inside of <> into the appropriate escape chars.
+ * 
+ * Or: ditch XML
  * 
  */
 
