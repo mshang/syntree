@@ -1,17 +1,17 @@
 
 /* TODO:
- * Spaces between brackets should be ignored.
- * Multiple spaces should be condensed to one space.
  * Read is_phrase attribute to draw triangles.
- * Check well-formedness of XML.
- * There are many redundancies between XML and square bracket format.
  * Escape characters for "<", ">", "[", "]", " ", in both tag names and data.
  * Subscripts.
- * Support for "<NP></NP>" in XML.
+ * Exceptions for ill-formed.
+ * remove_spaces, replace and square_to_xml should be prototype methods of string, called with dot.
+ * Note in help file that there must be a space between "[NP" and data.
+ * Height resizing doesn't work.
+ * Apostrophes don't work.
+ * Draw as you type.
  *
- * Plan:
- * Transform square bracket notation to XML,
- * Remove all spaces before and after "<" and ">"
+ * In order to deal with apostrophes, spaces, brackets, and other non-alphanumeric charaters in tag names,
+ * make a text preprocessor which will transform anything inside of "" into the appropriate escape chars.
  * 
  */
 
