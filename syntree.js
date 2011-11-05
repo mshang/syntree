@@ -3,12 +3,13 @@
  * Read is_phrase attribute to draw triangles.
  * Escape characters for "<", ">", "[", "]", " ", in both tag names and data.
  * Subscripts.
- * Exceptions for ill-formed.
+ * Exceptions for ill-formed. Die silently.
  * remove_spaces, replace and square_to_xml should be prototype methods of string, called with dot.
  * Note in help file that there must be a space between "[NP" and data.
  * Height resizing doesn't work.
  * Apostrophes don't work.
  * Draw as you type.
+ * Add in closing brackets automatically.
  *
  * In order to deal with apostrophes, spaces, brackets, and other non-alphanumeric charaters in tag names,
  * make a text preprocessor which will transform anything inside of "" into the appropriate escape chars.
@@ -21,6 +22,14 @@ var font_size;
 var font_style;
 var tree_height = 0;
 var ctx;
+
+function Node() {
+	this.type = null;
+	this.value = null;
+	this.step = null;
+	this.is_phrase = null;
+	this.children = new Array();
+}
 
 function go() {
 
@@ -39,53 +48,20 @@ function go() {
 	ctx.font = font_size + "pt " + font_style;
 	
 	// Get the string and parse it.
-	var s = document.f.i.value;
-	if (s[0] == "[") {
-		var root = parse(s, ctx);
-	
-		// Find out dimensions of the tree and set the size of the canvas to suit.
-		set_widths(root);
-		find_height(root, 0);
-		var width = 1.2 * (root.left_width + root.right_width);
-		var height = (tree_height + 1) * vert_space * 1;
-		clear(root, width, height);
-		draw(root, 0, 0);
-		
-	} else if (s[0] == "<") {
-		try{ var xml = $.parseXML(s); } catch(err) {
-			alert("Ill-formed XML");
-		}
-		var root = xml.documentElement;
-		Node.prototype.check_phrase_xml = check_phrase_xml;
-		Node.prototype.set_widths_xml = set_widths_xml;
-		Node.prototype.find_height_xml = find_height_xml;
-		Node.prototype.draw_xml = draw_xml;
-		
-		root.check_phrase_xml();
-		root.set_widths_xml();
-		root.find_height_xml(0);
-		var width = 1.2 * (root.left_width + root.right_width);
-		var height = (tree_height + 1) * vert_space * 1;
-		clear(root, width, height);
-		root.draw_xml(0, 0);
-		
-	} else {
-		alert("Ill-formed. Input must start with a bracket.");
-	}
-	
-	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
-	new_img.id = "treeimg";
-	new_img.border = "1";
-	var old_img = document.getElementById('treeimg');
-	old_img.parentNode.replaceChild(new_img, old_img);
-	ctx.canvas.style.display = "none";
-	
-	/* debug
-	alert(JSON.stringify(root));
-	*/
-}
+	var str = document.f.i.value;
 
-function clear(root, width, height) {
+	str = close_brackets(str);
+	var root = parse(str);
+	root.check_phrase();
+	//alert(JSON.stringify(root));
+
+	// Find out dimensions of the tree.
+	root.set_width();
+	root.find_height(0);
+	var width = 1.2 * (root.left_width + root.right_width);
+	var height = (tree_height + 1) * vert_space * 1;
+	
+	// Make a new canvas. Required for IE compatability.
 	var canvas = document.createElement("canvas");
 	canvas.id = "canvas";
 	canvas.width = width;
@@ -100,6 +76,15 @@ function clear(root, width, height) {
 	var x_shift = root.left_width + 0.1 * (root.left_width + root.right_width);
 	var y_shift = 0.3 * (height / tree_height) + font_size/2;
 	ctx.translate(x_shift, y_shift);
+	
+	root.draw(0, 0);
+	
+	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
+	new_img.id = "treeimg";
+	new_img.border = "1";
+	var old_img = document.getElementById('treeimg');
+	old_img.parentNode.replaceChild(new_img, old_img);
+	ctx.canvas.style.display = "none";
 }
 
 function check_phrase_xml() {
@@ -117,90 +102,114 @@ function check_phrase_xml() {
 	}
 }
 
-function parse(ss, ctx) {
-	var node = new Object();
-	node.children = new Array();
-	var cchild = 0;
-	
-	if ((ss[0] != "[") || (ss[ss.length - 1] != "]")) {
-		alert("Ill-formed.");
-		return 0;
+function close_brackets(str) {
+	var open = 0;
+	for (var i = 0; i < str.length; i++) {
+		if (str[i] == "[")
+			open++;
+		if (str[i] == "]")
+			open--;
 	}
-	
-	var start = 1;
-	while ((ss[start] != " ") && (ss[start] != "[") && (ss[start] != "]")) {
-		start++;
+	while (open > 0) {
+		str = str + "]";
+		open--;
 	}
-	if (ss[start] == "]") {
-		node.text = ss.substr(1, start-1);
-		return node;
-	}
-	
-	node.type = ss.substr(1, start-1);
-	node.is_phrase = 0;
-	if ((node.type[node.type.length - 1] == "P") && (node.type.length != 1)) {
-		node.is_phrase = 1;
-	}
-	while (ss[start] == " ") {
-		start++;
-	}
-	
-	if (ss[start] == "[") {
-		var current = start;
-		var cstart = start;
-		var level = 0;
-		while (current < ss.length - 1) {
-		
-			if (ss[current] == "[") {
-				level++;
-				if (level == 1) {
-					cstart = current;
-				}
-			}
-			
-			if (ss[current] == "]") {
-				level--;
-				if (level == 0) {
-					node.children[cchild] = parse(ss.substr(cstart, current - cstart + 1), ctx);
-					cchild++;
-				}
-			}
-			
-			current++;
-		}
-	} else {
-		node.text = ss.substr(start, ss.length - start - 1);
-	}
-	
-	return node;
+	return str;
 }
 
-function set_widths(n) {
-
-	var length = n.children.length;
-
-	for (var i = 0; i < length; i++) {
-		set_widths(n.children[i]);
+function parse(str) {
+	// This function should only set the type and value properties.
+	var n = new Node();
+	
+	if (str[0] != "[") { // Text node
+		n.type = "text";
+		var i = 0;
+		while (str[i] == " ")
+			i++;
+		var j = str.length - 1;
+		while (str[j] == " ")
+			j--;
+		n.value = str.substring(i, j+1);
+		return n;
 	}
 	
-	if ('text' in n) {
-		n.left_width = ctx.measureText(n.text).width / 2;
-		n.right_width = n.left_width;
+	// Element node.
+	n.type = "element";
+	var i = 1;
+	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]"))
+		i++;
+	n.value = str.substr(1, i-1);
+	while (str[i] == " ")
+		i++;
+	if (str[i] == "]")
+		return n;
+	// We are now on the first non-space char of the content
+	
+	var level = 1;
+	var start = i;
+	for (; i < str.length - 1; i++) {
+		var temp = level;
+		if (str[i] == "[")
+			level++;
+		if (str[i] == "]")
+			level--;
+		if ((temp == 1) && (level == 2)) {
+			if (str.substring(start, i).search(/\w/) > -1) {
+				n.children.push(parse(str.substring(start, i)));
+			}
+			start = i;
+		}
+		if ((temp == 2) && (level == 1)) {
+			n.children.push(parse(str.substring(start, i+1)));
+			start = i+1;
+		}
+	}
+	if (str.substring(start, i).search(/\w/) > -1) {
+		n.children.push(parse(str.substring(start, i)));
+	}
+	
+	return n;
+}
+
+Node.prototype.check_phrase = function() {
+	this.is_phrase = 0;
+
+	if (this.type == "element") {
+		if ((this.value[this.value.length-1] == "P") && (this.value.length > 1))
+			this.is_phrase = 1;
+	}
+
+	for (var i = 0; i < this.children.length; i++) {
+		this.children[i].check_phrase();
+	}
+}
+
+Node.prototype.set_width = function() {
+
+	var length = this.children.length;
+
+	for (var i = 0; i < length; i++) {
+		this.children[i].set_width();
+	}
+	
+	if (this.type == "text") {
+		this.left_width = ctx.measureText(this.value).width / 2;
+		this.right_width = this.left_width;
 	} else {
 	
 		// Figure out how wide apart the children should be placed.
 		// The spacing between them should be equal.
-		n.step = 0;
+		this.step = 0;
 		for (var i = 0; i < length - 1; i++) {
-			var space = n.children[i].right_width + hor_space + n.children[i+1].left_width;
-			if (space > n.step) {
-				n.step = space;
+			var space = this.children[i].right_width + hor_space + this.children[i+1].left_width;
+			if (space > this.step) {
+				this.step = space;
 			}
 		}
 		
-		var sub = ((length - 1) / 2) * n.step;
-		n.left_width = sub + n.children[0].left_width;
-		n.right_width = sub + n.children[length-1].right_width;
+		var sub = ((length - 1) / 2) * this.step;
+		this.left_width = sub + this.children[0].left_width;
+		this.right_width = sub + this.children[length-1].right_width;
 	}
 }
 
@@ -237,59 +246,44 @@ function set_widths_xml() {
 	}
 }
 
-function find_height(n, h) {
-
-	if ('text' in n) {h++;}
+Node.prototype.find_height = function(h) {
 	if (h > tree_height) {
 		tree_height = h;
 	}
 	
-	for (var i = 0; i < n.children.length; i++) {
-		find_height(n.children[i], h + 1);
+	for (var i = 0; i < this.children.length; i++) {
+		this.children[i].find_height(h + 1);
 	}
 }
 
-function find_height_xml(h) {
-	if (h > tree_height) {
-		tree_height = h;
+Node.prototype.draw = function(x, y) {
+	var length = this.children.length;
+	
+	if (this.type == "text") {
+		ctx.fillText(this.value, x, y);
+		return;
 	}
 	
-	for (var i = 0, current = this.firstChild;
-			i < this.childNodes.length; 
-			i++, current = current.nextSibling) {
-		current.find_height_xml(h+1);
+	ctx.fillText(this.value, x, y);
+	for (var i = 0; i < length; i++) {
+		var left_start = x - (this.step)*((length-1)/2);
+		this.children[i].draw(left_start + i*(this.step), y + vert_space);
 	}
-}
-
-function draw(n, x, y) {
-	var length = n.children.length;
 	
-	if ('type' in n) {
-		ctx.fillText(n.type, x, y);
-		if ('text' in n) {
-			ctx.fillText(n.text, x, y + vert_space);
-			if (n.is_phrase) {
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(x - n.left_width, y + vert_space - font_size * 1.2);
-				ctx.lineTo(x + n.right_width, y + vert_space - font_size * 1.2);
-				ctx.lineTo(x, y + font_size * 0.2);
-				ctx.stroke();
-			} else {
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(x, y + vert_space - font_size * 1.2);
-				ctx.stroke();
-			}
-		} else {
-			for (var i = 0; i < length; i++) {
-				var left_start = x - (n.step)*((length-1)/2);
-				draw(n.children[i], left_start + i*(n.step), y + vert_space);
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(left_start + i*(n.step), y + vert_space - font_size * 1.2);
-				ctx.stroke();
-			}
+	// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
+	if ((length == 1) && (this.children[0].type == "text") && (this.is_phrase)) {
+		ctx.moveTo(x, y + font_size * 0.2);
+		ctx.lineTo(x - this.left_width, y + vert_space - font_size * 1.2);
+		ctx.lineTo(x + this.right_width, y + vert_space - font_size * 1.2);
+		ctx.lineTo(x, y + font_size * 0.2);
+		ctx.stroke();
+	} else { // Draw lines to all children
+		for (var i = 0; i < length; i++) {
+			var left_start = x - (this.step)*((length-1)/2);
+			ctx.moveTo(x, y + font_size * 0.2);
+			ctx.lineTo(left_start + i*(this.step), y + vert_space - font_size * 1.2);
+			ctx.stroke();
 		}
-	} else {
-		ctx.fillText(n.text, x, y);
 	}
 }
 
