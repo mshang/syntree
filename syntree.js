@@ -87,21 +87,6 @@ function go() {
 	ctx.canvas.style.display = "none";
 }
 
-function check_phrase_xml() {
-	this.is_phrase = 0;
-	if (this.nodeType == 1) {
-		if ((this.nodeName[this.nodeName.length - 1] == "P")
-				&& (this.nodeName.length != 1)) {
-			this.is_phrase = 1;
-		}
-		for (var i = 0, current = this.firstChild;
-				i < this.childNodes.length; 
-				i++, current = current.nextSibling) {
-			current.check_phrase_xml();
-		}
-	}
-}
-
 function close_brackets(str) {
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
@@ -213,39 +198,6 @@ Node.prototype.set_width = function() {
 	}
 }
 
-function set_widths_xml() {
-	switch(this.nodeType) {
-	case 1:
-		for (var i = 0, current = this.firstChild;
-				i < this.childNodes.length; 
-				i++, current = current.nextSibling) {
-			current.set_widths_xml();
-		}
-		
-		// Figure out how wide apart the children should be placed.
-		// The spacing between them should be equal.
-		this.step = 0;
-		for (var i = 0, current = this.firstChild;
-				i < this.childNodes.length - 1; 
-				i++, current = current.nextSibling) {
-			var space = current.right_width + hor_space + current.nextSibling.left_width;
-			if (space > this.step) {
-				this.step = space;
-			}
-		}
-		
-		var sub = ((this.childNodes.length - 1) / 2) * this.step;
-		this.left_width = sub + this.firstChild.left_width;
-		this.right_width = sub + this.lastChild.right_width;
-		
-		break;
-	case 3: // Text node
-		this.left_width = ctx.measureText(this.nodeValue).width / 2;
-		this.right_width = this.left_width;
-		break;
-	}
-}
-
 Node.prototype.find_height = function(h) {
 	if (h > tree_height) {
 		tree_height = h;
@@ -284,43 +236,5 @@ Node.prototype.draw = function(x, y) {
 			ctx.lineTo(left_start + i*(this.step), y + vert_space - font_size * 1.2);
 			ctx.stroke();
 		}
-	}
-}
-
-function draw_xml(x, y) {
-	switch (this.nodeType) {
-	case 1:
-		ctx.fillText(this.nodeName, x, y);
-		for (var i = 0, current = this.firstChild;
-				i < this.childNodes.length; 
-				i++, current = current.nextSibling) {
-			var left_start = x - (this.step)*((this.childNodes.length-1)/2);
-			current.draw_xml(left_start + i*(this.step), y + vert_space);
-		}
-		
-		// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
-		if ((this.childNodes.length == 1)
-				&& (this.firstChild.nodeType == 3)
-				&& (this.is_phrase)) {
-			ctx.moveTo(x, y + font_size * 0.2);
-			ctx.lineTo(x - this.left_width, y + vert_space - font_size * 1.2);
-			ctx.lineTo(x + this.right_width, y + vert_space - font_size * 1.2);
-			ctx.lineTo(x, y + font_size * 0.2);
-			ctx.stroke();
-		} else { // Draw lines to all children
-			for (var i = 0, current = this.firstChild;
-					i < this.childNodes.length; 
-					i++, current = current.nextSibling) {
-				var left_start = x - (this.step)*((this.childNodes.length-1)/2);
-				ctx.moveTo(x, y + font_size * 0.2);
-				ctx.lineTo(left_start + i*(this.step), y + vert_space - font_size * 1.2);
-				ctx.stroke();
-			}
-		}
-		
-		break;
-	case 3: // Text node
-		ctx.fillText(this.nodeValue, x, y);
-		break;
 	}
 }
