@@ -1,16 +1,10 @@
 
 /* TODO:
  * Read is_phrase attribute to draw triangles.
- * Escape characters for "<", ">", "[", "]", " ", in both tag names and data.
  * Subscripts.
- * Exceptions for ill-formed. Die silently.
- * remove_spaces, replace and square_to_xml should be prototype methods of string, called with dot.
- * Note in help file that there must be a space between "[NP" and data.
- * Height resizing doesn't work.
- * Apostrophes don't work.
+ * To get consistent line widths, must align with pixel grid.
  *
- * In order to deal with apostrophes, spaces, brackets, and other non-alphanumeric charaters in tag names,
- * make a text preprocessor which will transform anything inside of "" into the appropriate escape chars.
+ * In order to deal with apostrophes, spaces, brackets, and other non-alphanumeric charaters, make parser ignore any special chars inside of "".
  * 
  */
 
