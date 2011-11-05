@@ -21,6 +21,17 @@
 		<script type="text/javascript" src="canvas2image.js"></script>
 		<script type="text/javascript" src="jquery.js"></script>
 		<script type="text/javascript" src="syntree.js"></script>
+		<script type="text/javascript">
+		$(function() {
+			go();
+			$(document.f.i).keyup(function() {
+				try { go(); } catch (err) { return; }
+			});
+			$(document.f.i).change(function() {
+				try { go(); } catch (err) { return; }
+			});
+		});
+		</script>
 	</head>
 	<body style="background-color:AntiqueWhite">
 		<center>
@@ -51,9 +62,6 @@
 						<td colspan="2">Horizontal spacing:</td>
 						<td align="right" colspan="3"><input type="range" name="horspace" style="width:100%" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"></td>
 					</tr>
-					<tr><td colspan="5" align="center">
-						<input type="button" value="Submit" onclick="go(); return false">
-					</td></tr>
 				</form>
 			
 				<tr><td colspan="5" align="center"><canvas id="canvas"></canvas></td></tr>
