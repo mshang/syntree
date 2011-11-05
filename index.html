@@ -24,10 +24,28 @@
 		<script type="text/javascript">
 		$(function() {
 			go();
+			
 			$(document.f.i).keyup(function() {
 				try { go(); } catch (err) { return; }
 			});
+			
 			$(document.f.i).change(function() {
+				try { go(); } catch (err) { return; }
+			});
+			
+			$(document.f.fontsize).change(function() {
+				try { go(); } catch (err) { return; }
+			});
+			
+			$(document.f.vertspace).change(function() {
+				try { go(); } catch (err) { return; }
+			});
+			
+			$(document.f.horspace).change(function() {
+				try { go(); } catch (err) { return; }
+			});
+			
+			$(document.f.fontstyle).change(function() {
 				try { go(); } catch (err) { return; }
 			});
 		});
@@ -52,15 +70,18 @@
 					</tr>
 					<tr>
 						<td colspan="2">Font size:</td>
-						<td align="right" colspan="3"><input type="range" name="fontsize" style="width:100%" min="8" max="16" value="12" step="2" onchange="fontSizeChange(this.value);"></td>
+						<td align="right" colspan="3"><input type="range" name="fontsize" 
+							style="width:100%" min="8" max="16" value="12" step="2"></td>
 					</tr>
 					<tr>
 						<td colspan="2">Vertical spacing:</td>
-						<td align="right" colspan="3"><input type="range" name="vertspace" style="width:100%" min="30" max="100" value="50" step="5" onchange="vertSpaceChange(this.value);"></td>
+						<td align="right" colspan="3"><input type="range" name="vertspace" 
+							style="width:100%" min="30" max="100" value="50" step="5"></td>
 					</tr>
 					<tr>
 						<td colspan="2">Horizontal spacing:</td>
-						<td align="right" colspan="3"><input type="range" name="horspace" style="width:100%" min="10" max="50" value="10" step="5" onchange="horSpaceChange(this.value);"></td>
+						<td align="right" colspan="3"><input type="range" name="horspace" 
+							style="width:100%" min="10" max="50" value="10" step="5"></td>
 					</tr>
 				</form>
 			
