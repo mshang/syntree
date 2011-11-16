@@ -26,6 +26,8 @@ function Node() {
 	this.max_height = null; // Distance of the descendent of this node that is farthest from root.
 	this.children = new Array();
 	this.parent = null;
+	this.x = null; // Where the node will eventually be drawn.
+	this.y = null;
 }
 
 function go() {
@@ -74,7 +76,8 @@ function go() {
 	var y_shift = 0.3 * (height / root.max_height) + font_size/2;
 	ctx.translate(x_shift, y_shift);
 	
-	root.draw(0, 0);
+	root.assign_location(0, 0);
+	root.draw();
 	
 	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
 	new_img.id = "treeimg";
@@ -244,41 +247,55 @@ Node.prototype.find_height = function(h) {
 	}
 }
 
-Node.prototype.draw = function(x, y) {
+Node.prototype.assign_location = function(x, y) {
+	this.x = x;
+	this.y = y;
+	
+	if (this.type = "element") {
+		var length = this.children.length;
+		var left_start = x - (this.step)*((length-1)/2);
+		
+		for (var i = 0; i < length; i++) {
+			this.children[i].assign_location(left_start + i*(this.step), y + vert_space);
+		}
+	}
+}
+
+Node.prototype.draw = function() {
 	var length = this.children.length;
 	
 	if (this.type == "text") {
-		ctx.fillText(this.value, x, y);
+		ctx.fillText(this.value, this.x, this.y);
 		if (this.tail != null) {
-			this.draw_movement(x, y);
+			this.draw_movement();
 		}
 		return;
 	}
 	
-	ctx.fillText(this.value, x, y);
+	ctx.fillText(this.value, this.x, this.y);
 	for (var i = 0; i < length; i++) {
-		var left_start = x - (this.step)*((length-1)/2);
-		this.children[i].draw(left_start + i*(this.step), y + vert_space);
+		this.children[i].draw();
 	}
 	
 	// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
 	if ((length == 1) && (this.children[0].type == "text") && (this.is_phrase)) {
-		ctx.moveTo(x, y + font_size * 0.2);
-		ctx.lineTo(x - this.left_width, y + vert_space - font_size * 1.2);
-		ctx.lineTo(x + this.right_width, y + vert_space - font_size * 1.2);
-		ctx.lineTo(x, y + font_size * 0.2);
+		var child = this.children[0];
+		ctx.moveTo(this.x, this.y + font_size * 0.2);
+		ctx.lineTo(child.x - child.left_width, child.y - font_size * 1.2);
+		ctx.lineTo(child.x + child.right_width, child.y - font_size * 1.2);
+		ctx.lineTo(this.x, this.y + font_size * 0.2);
 		ctx.stroke();
 	} else { // Draw lines to all children
 		for (var i = 0; i < length; i++) {
-			var left_start = x - (this.step)*((length-1)/2);
-			ctx.moveTo(x, y + font_size * 0.2);
-			ctx.lineTo(left_start + i*(this.step), y + vert_space - font_size * 1.2);
+			var child = this.children[i];
+			ctx.moveTo(this.x, this.y + font_size * 0.2);
+			ctx.lineTo(child.x, child.y - font_size * 1.2);
 			ctx.stroke();
 		}
 	}
 }
 
-Node.prototype.draw_movement = function(x, y) {
+Node.prototype.draw_movement = function() {
 	var head = root.find_head(this.tail);
 	if (head == null)
 		throw "Head of movement not found.";
@@ -288,8 +305,21 @@ Node.prototype.draw_movement = function(x, y) {
 		n = n.parent;
 		if (n == head)
 			throw "Head of movement is parent of tail.";
+		// Remember ancestor chain to more easily find latest common ancestor between head and tail.
+		n.tail_chain = 1;
 	}
 	// Find the max height intervening between tail and head.
+	// First, must find the latest common ancestor.
+	n = head;
+	var lca = null;
+	while (n.parent != null) {
+		if (n.tail_chain) {
+			lca = n;
+			break;
+		}
+	}
+	if (lca == null)
+		throw "Could not find common ancestor.";
 	
 }
 
