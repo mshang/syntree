@@ -56,7 +56,7 @@ function go() {
 	// Find out dimensions of the tree.
 	root.set_width();
 	root.find_height(0);
-	alert(JSON.stringify(root));
+	//alert(JSON.stringify(root));
 	var width = 1.2 * (root.left_width + root.right_width);
 	var height = (root.max_height + 1) * vert_space * 1;
 	
@@ -251,7 +251,7 @@ Node.prototype.assign_location = function(x, y) {
 	this.x = x;
 	this.y = y;
 	
-	if (this.type = "element") {
+	if (this.type == "element") {
 		var length = this.children.length;
 		var left_start = x - (this.step)*((length-1)/2);
 		
@@ -321,6 +321,10 @@ Node.prototype.draw_movement = function() {
 	if (lca == null)
 		throw "Could not find common ancestor.";
 	
+	// As a testing measure, draw a direct line.
+	ctx.moveTo(this.x, this.y + font_size * 0.2);
+	ctx.lineTo(head.x, head.y + font_size * 0.2);
+	ctx.stroke();
 }
 
 Node.prototype.find_head = function(label) {
