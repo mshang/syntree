@@ -52,11 +52,11 @@ function go() {
 	str = close_brackets(str);
 	root = parse(str, null);
 	root.check_phrase();
-	alert(JSON.stringify(root));
 
 	// Find out dimensions of the tree.
 	root.set_width();
 	root.find_height(0);
+	alert(JSON.stringify(root));
 	var width = 1.2 * (root.left_width + root.right_width);
 	var height = (tree_height + 1) * vert_space * 1;
 	
@@ -240,7 +240,7 @@ Node.prototype.find_height = function(h) {
 	
 	this.max_height = 0;
 	if (this.children.length == 0) {
-		this.max_height = height;
+		this.max_height = this.height;
 	}
 	
 	for (var i = 0; i < this.children.length; i++) {
@@ -289,10 +289,10 @@ Node.prototype.draw_movement = function(x, y) {
 	if (head == null)
 		throw "Head of movement not found.";
 	// Make sure head is not parent of this node.
-	Node n = this;
+	var n = this;
 	while (n.parent != null) {
 		n = n.parent;
-		if (n == head) {
+		if (n == head)
 			throw "Head of movement is parent of tail.";
 	}
 	// Find the max height intervening between tail and head.
