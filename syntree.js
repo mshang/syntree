@@ -12,7 +12,6 @@ var vert_space;
 var hor_space;
 var font_size;
 var font_style;
-var tree_height = 0;
 var ctx;
 var root;
 
@@ -38,7 +37,6 @@ function go() {
 	for (var i = 0; i < 3; i++) {
 		if (document.f.fontstyle[i].checked) font_style = document.f.fontstyle[i].value;
 	}
-	tree_height = 0;
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
 	// We need to set font options so that measureText works properly.
@@ -58,7 +56,7 @@ function go() {
 	root.find_height(0);
 	alert(JSON.stringify(root));
 	var width = 1.2 * (root.left_width + root.right_width);
-	var height = (tree_height + 1) * vert_space * 1;
+	var height = (root.max_height + 1) * vert_space * 1;
 	
 	// Make a new canvas. Required for IE compatability.
 	var canvas = document.createElement("canvas");
@@ -73,7 +71,7 @@ function go() {
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
 	var x_shift = root.left_width + 0.1 * (root.left_width + root.right_width);
-	var y_shift = 0.3 * (height / tree_height) + font_size/2;
+	var y_shift = 0.3 * (height / root.max_height) + font_size/2;
 	ctx.translate(x_shift, y_shift);
 	
 	root.draw(0, 0);
@@ -233,10 +231,6 @@ Node.prototype.set_width = function() {
 
 Node.prototype.find_height = function(h) {
 	this.height = h;
-
-	if (h > tree_height) {
-		tree_height = h;
-	}
 	
 	this.max_height = 0;
 	if (this.children.length == 0) {
