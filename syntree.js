@@ -80,11 +80,12 @@ function go() {
 	root.set_width();
 	root.find_height(0);
 	root.assign_location(0, 0);
+	movement_lines = new Array();
 	root.find_movement();
 	set_up_movement();
 	//alert(JSON.stringify(root));
 	var width = 1.2 * (root.left_width + root.right_width);
-	var height = (root.max_height + 1) * vert_space * 1;
+	var height = set_window_height();
 	
 	// Make a new canvas. Required for IE compatability.
 	var canvas = document.createElement("canvas");
@@ -392,4 +393,15 @@ function set_up_movement() {
 		m.dest_y = m.head.max_height * vert_space;
 		m.bottom_y = (m.lca.max_height + 1) * vert_space;
 	}
+}
+
+function set_window_height() {
+	var h = (root.max_height + 1) * vert_space;
+	// Problem: movement lines may protrude from bottom.
+	for (var i = 0; i < movement_lines.length; i++) {
+		var m = movement_lines[i];
+		if (m.bottom_y >= h)
+			h = (root.max_height + 2) * vert_space;
+	}
+	return h;
 }
