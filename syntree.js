@@ -335,8 +335,10 @@ Node.prototype.draw_movement = function() {
 	
 	// As a testing measure, draw a direct line.
 	var dest_x = head.x;
-	var dest_y = head.y + (head.max_height - head.height) * vert_space;
+	var dest_y = head.max_height * vert_space;
+	var bottom_y = (lca.max_height + 1) * vert_space;
 	ctx.moveTo(this.x, this.y + font_size * 0.2);
+	ctx.lineTo((this.x + dest_x) / 2, bottom_y);
 	ctx.lineTo(dest_x, dest_y + font_size * 0.2);
 	ctx.stroke();
 }
