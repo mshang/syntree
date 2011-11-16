@@ -121,33 +121,31 @@ function parse(str) {
 	n.value = str.substr(1, i-1);
 	while (str[i] == " ")
 		i++;
-	if (str[i] == "]")
-		return n;
-	// We are now on the first non-space char of the content
-	
-	var level = 1;
-	var start = i;
-	for (; i < str.length; i++) {
-		var temp = level;
-		if (str[i] == "[")
-			level++;
-		if (str[i] == "]")
-			level--;
-		if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
-			if (str.substring(start, i).search(/\w/) > -1) {
-				n.children.push(parse(str.substring(start, i)));
+	if (str[i] != "]") {
+		var level = 1;
+		var start = i;
+		for (; i < str.length; i++) {
+			var temp = level;
+			if (str[i] == "[")
+				level++;
+			if (str[i] == "]")
+				level--;
+			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
+				if (str.substring(start, i).search(/\w/) > -1) {
+					n.children.push(parse(str.substring(start, i)));
+				}
+				start = i;
 			}
-			start = i;
-		}
-		if ((temp == 2) && (level == 1)) {
-			if (str[i+1] == "_") { // Must include label.
-				i += 2;
-				while (str[i].search(/\w/) > -1)
-					i++;
-				i--;
+			if ((temp == 2) && (level == 1)) {
+				if (str[i+1] == "_") { // Must include label.
+					i += 2;
+					while (str[i].search(/\w/) > -1)
+						i++;
+					i--;
+				}
+				n.children.push(parse(str.substring(start, i+1)));
+				start = i+1;
 			}
-			n.children.push(parse(str.substring(start, i+1)));
-			start = i+1;
 		}
 	}
 	
