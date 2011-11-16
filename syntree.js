@@ -5,6 +5,12 @@
  * To get consistent line widths, must align with pixel grid.
  *
  * In order to deal with apostrophes, spaces, brackets, and other non-alphanumeric charaters, make parser ignore any special chars inside of "".
+ *
+ * Movement:
+ * Destinations labelled with _# directly after closing square bracket (e.g. [NP Miles]_1)
+ * Only numeric labels.
+ * Sources indicated with <#> anywhere within text.
+ * Make sure that destination is not parent of source.
  * 
  */
 
