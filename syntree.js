@@ -21,6 +21,7 @@ function Node() {
 	this.step = null;
 	this.is_phrase = null;
 	this.label = null;
+	this.tail = null;
 	this.height = null;
 	this.children = new Array();
 }
@@ -97,12 +98,36 @@ function close_brackets(str) {
 	return str;
 }
 
+Node.prototype.get_tail = function(str) {
+	// Get any movement information.
+	// Make sure to collapse any spaces around <X> to one space, even if there is no space.
+	for (var i = 0; i < str.length; i++) {
+		if (str[i] == "<") {
+			var j = i;
+			while ((j < str.length) && (str[j] != ">"))
+				j++;
+			if (j == str.length)
+				throw "Did not find matching angle bracket.";
+			this.tail = str.substring(i+1, j);
+			// i lies on "<", j lies on ">"
+			i--;
+			while (str[i] == " ")
+				i--;
+			j++;
+			while (str[j] == " ")
+				j++;
+			return str.substring(0, i+1) + " " + str.substring(j);
+		}
+	}
+	return str;
+}
+
 function parse(str) {
-	// This function should only set the type and value properties.
 	var n = new Node();
 	
 	if (str[0] != "[") { // Text node
 		n.type = "text";
+		str = n.get_tail(str);
 		var i = 0;
 		while (str[i] == " ")
 			i++;
