@@ -334,8 +334,10 @@ Node.prototype.draw_movement = function() {
 		throw "Could not find common ancestor.";
 	
 	// As a testing measure, draw a direct line.
+	var dest_x = head.x;
+	var dest_y = head.y + (head.max_height - head.height) * vert_space;
 	ctx.moveTo(this.x, this.y + font_size * 0.2);
-	ctx.lineTo(head.x, head.y + font_size * 0.2);
+	ctx.lineTo(dest_x, dest_y + font_size * 0.2);
 	ctx.stroke();
 }
 
