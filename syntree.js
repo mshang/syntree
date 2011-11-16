@@ -83,10 +83,16 @@ function go() {
 	movement_lines = new Array();
 	root.find_movement();
 	set_up_movement();
+	set_up_canvas();
+	root.draw();
+	draw_movement();
+	swap_out_image();
 	//alert(JSON.stringify(root));
+}
+
+function set_up_canvas() {
 	var width = 1.2 * (root.left_width + root.right_width);
 	var height = set_window_height();
-	
 	// Make a new canvas. Required for IE compatability.
 	var canvas = document.createElement("canvas");
 	canvas.id = "canvas";
@@ -102,10 +108,9 @@ function go() {
 	var x_shift = root.left_width + 0.1 * (root.left_width + root.right_width);
 	var y_shift = 0.3 * (height / root.max_height) + font_size/2;
 	ctx.translate(x_shift, y_shift);
-	
-	root.draw();
-	draw_movement();
-	
+}
+
+function swap_out_image() {
 	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
 	new_img.id = "treeimg";
 	new_img.border = "1";
