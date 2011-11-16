@@ -48,7 +48,7 @@ function go() {
 	str = close_brackets(str);
 	var root = parse(str);
 	root.check_phrase();
-	//alert(JSON.stringify(root));
+	alert(JSON.stringify(root));
 
 	// Find out dimensions of the tree.
 	root.set_width();
@@ -127,26 +127,36 @@ function parse(str) {
 	
 	var level = 1;
 	var start = i;
-	for (; i < str.length - 1; i++) {
+	for (; i < str.length; i++) {
 		var temp = level;
 		if (str[i] == "[")
 			level++;
 		if (str[i] == "]")
 			level--;
-		if ((temp == 1) && (level == 2)) {
+		if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
 			if (str.substring(start, i).search(/\w/) > -1) {
 				n.children.push(parse(str.substring(start, i)));
 			}
 			start = i;
 		}
 		if ((temp == 2) && (level == 1)) {
+			if (str[i+1] == "_") { // Must include label.
+				i += 2;
+				while (str[i].search(/\w/) > -1)
+					i++;
+				i--;
+			}
 			n.children.push(parse(str.substring(start, i+1)));
 			start = i+1;
 		}
 	}
-	if (str.substring(start, i).search(/\w/) > -1) {
-		n.children.push(parse(str.substring(start, i)));
-	}
+	
+	var j = str.length-1;
+	while (str[j] != "]")
+		j--;
+	// j sits on "]", j+1 sits on "_", so the label is j+2 to the end
+	if (j+2 < str.length)
+		n.label = str.substring(j+2);
 	
 	return n;
 }
