@@ -23,31 +23,14 @@
 		<script type="text/javascript" src="syntree.js"></script>
 		<script type="text/javascript">
 		$(function() {
-			go();
+			handler();
 			
-			$(document.f.i).keyup(function() {
-				try { go(); } catch (err) { return; }
-			});
-			
-			$(document.f.i).change(function() {
-				try { go(); } catch (err) { return; }
-			});
-			
-			$(document.f.fontsize).change(function() {
-				try { go(); } catch (err) { return; }
-			});
-			
-			$(document.f.vertspace).change(function() {
-				try { go(); } catch (err) { return; }
-			});
-			
-			$(document.f.horspace).change(function() {
-				try { go(); } catch (err) { return; }
-			});
-			
-			$(document.f.fontstyle).change(function() {
-				try { go(); } catch (err) { return; }
-			});
+			$(document.f.i).keyup(handler);
+			$(document.f.i).change(handler);
+			$(document.f.fontsize).change(handler);
+			$(document.f.vertspace).change(handler);
+			$(document.f.horspace).change(handler);
+			$(document.f.fontstyle).change(handler);
 		});
 		</script>
 	</head>

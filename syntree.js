@@ -8,6 +8,7 @@
  * 
  */
 
+var debug = 1;
 var vert_space;
 var hor_space;
 var font_size;
@@ -28,6 +29,16 @@ function Node() {
 	this.parent = null;
 	this.x = null; // Where the node will eventually be drawn.
 	this.y = null;
+}
+
+function handler() {
+	if (debug) {
+		go();
+	} else {
+		try {
+			go();
+		} catch (err) {	}
+	}
 }
 
 function go() {
@@ -163,7 +174,7 @@ function parse(str, parent) {
 				level--;
 			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
 				if (str.substring(start, i).search(/\w/) > -1) {
-					n.children.push(parse(str.substring(start, i)));
+					n.children.push(parse(str.substring(start, i), n));
 				}
 				start = i;
 			}
@@ -174,7 +185,7 @@ function parse(str, parent) {
 						i++;
 					i--;
 				}
-				n.children.push(parse(str.substring(start, i+1)));
+				n.children.push(parse(str.substring(start, i+1), n));
 				start = i+1;
 			}
 		}
@@ -313,6 +324,7 @@ Node.prototype.draw_movement = function() {
 	n = head;
 	var lca = null;
 	while (n.parent != null) {
+		n = n.parent;
 		if (n.tail_chain) {
 			lca = n;
 			break;
@@ -329,7 +341,7 @@ Node.prototype.draw_movement = function() {
 
 Node.prototype.find_head = function(label) {
 	for (var i = 0; i < this.children.length; i++) {
-		var res = children[i].find_head(label);
+		var res = this.children[i].find_head(label);
 		if (res != null)
 			return res;
 	}
