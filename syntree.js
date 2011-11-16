@@ -20,6 +20,8 @@ function Node() {
 	this.value = null;
 	this.step = null;
 	this.is_phrase = null;
+	this.label = null;
+	this.height = null;
 	this.children = new Array();
 }
 
@@ -192,6 +194,8 @@ Node.prototype.set_width = function() {
 }
 
 Node.prototype.find_height = function(h) {
+	this.height = h;
+
 	if (h > tree_height) {
 		tree_height = h;
 	}
