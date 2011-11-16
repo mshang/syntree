@@ -108,7 +108,8 @@ Node.prototype.get_tail = function(str) {
 				j++;
 			if (j == str.length)
 				throw "Did not find matching angle bracket.";
-			this.tail = str.substring(i+1, j);
+			if (i+1 < j)
+				this.tail = str.substring(i+1, j);
 			// i lies on "<", j lies on ">"
 			i--;
 			while (str[i] == " ")
