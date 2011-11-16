@@ -5,6 +5,8 @@
  * Only numeric labels.
  * Sources indicated with <#> anywhere within text.
  * Make sure that destination is not parent of source.
+ *
+ * Take widths of categories into consideration.
  * 
  */
 
@@ -15,6 +17,7 @@ var font_size;
 var font_style;
 var ctx;
 var root;
+var movement_lines = new Array();
 
 function Node() {
 	this.type = null; // "text" or "element"
@@ -29,6 +32,15 @@ function Node() {
 	this.parent = null;
 	this.x = null; // Where the node will eventually be drawn.
 	this.y = null;
+}
+
+function MovementLine() {
+	this.head = null;
+	this.tail = null;
+	this.lca = null;
+	this.dest_x = null;
+	this.dest_y = null;
+	this.bottom_y = null;
 }
 
 function handler() {
@@ -67,6 +79,9 @@ function go() {
 	// Find out dimensions of the tree.
 	root.set_width();
 	root.find_height(0);
+	root.assign_location(0, 0);
+	root.find_movement();
+	set_up_movement();
 	//alert(JSON.stringify(root));
 	var width = 1.2 * (root.left_width + root.right_width);
 	var height = (root.max_height + 1) * vert_space * 1;
@@ -87,8 +102,8 @@ function go() {
 	var y_shift = 0.3 * (height / root.max_height) + font_size/2;
 	ctx.translate(x_shift, y_shift);
 	
-	root.assign_location(0, 0);
 	root.draw();
+	draw_movement();
 	
 	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
 	new_img.id = "treeimg";
@@ -277,9 +292,6 @@ Node.prototype.draw = function() {
 	
 	if (this.type == "text") {
 		ctx.fillText(this.value, this.x, this.y);
-		if (this.tail != null) {
-			this.draw_movement();
-		}
 		return;
 	}
 	
@@ -306,41 +318,14 @@ Node.prototype.draw = function() {
 	}
 }
 
-Node.prototype.draw_movement = function() {
-	var head = root.find_head(this.tail);
-	if (head == null)
-		throw "Head of movement not found.";
-	// Make sure head is not parent of this node.
-	var n = this;
-	while (n.parent != null) {
-		n = n.parent;
-		if (n == head)
-			throw "Head of movement is parent of tail.";
-		// Remember ancestor chain to more easily find latest common ancestor between head and tail.
-		n.tail_chain = 1;
+function draw_movement() {
+	for (var i = 0; i < movement_lines.length; i++) {
+		var m = movement_lines[i];
+		ctx.moveTo(m.tail.x, m.tail.y + font_size * 0.2);
+		ctx.lineTo((m.tail.x + m.dest_x) / 2, m.bottom_y);
+		ctx.lineTo(m.dest_x, m.dest_y + font_size * 0.2);
+		ctx.stroke();
 	}
-	// Find the max height intervening between tail and head.
-	// First, must find the latest common ancestor.
-	n = head;
-	var lca = null;
-	while (n.parent != null) {
-		n = n.parent;
-		if (n.tail_chain) {
-			lca = n;
-			break;
-		}
-	}
-	if (lca == null)
-		throw "Could not find common ancestor.";
-	
-	// As a testing measure, draw a direct line.
-	var dest_x = head.x;
-	var dest_y = head.max_height * vert_space;
-	var bottom_y = (lca.max_height + 1) * vert_space;
-	ctx.moveTo(this.x, this.y + font_size * 0.2);
-	ctx.lineTo((this.x + dest_x) / 2, bottom_y);
-	ctx.lineTo(dest_x, dest_y + font_size * 0.2);
-	ctx.stroke();
 }
 
 Node.prototype.find_head = function(label) {
@@ -354,5 +339,57 @@ Node.prototype.find_head = function(label) {
 		return this;
 	} else {
 		return null;
+	}
+}
+
+Node.prototype.find_movement = function() {
+	if (this.type == "element") {
+		for (var i = 0; i < this.children.length; i++) {
+			this.children[i].find_movement();
+		}
+	} else if (this.type == "text") {
+		if (this.tail != null) {
+			var m = new MovementLine;
+			m.tail = this;
+			m.head = root.find_head(this.tail);
+			movement_lines.push(m);
+		}
+	} else {
+		throw "Trying to find movement. type not recognized.";
+	}
+}
+
+function set_up_movement() {
+	for (var i = 0; i < movement_lines.length; i++) {
+		var m = movement_lines[i];
+		if ((m.tail == null) || (m.head == null))
+			throw "Null head or tail.";
+		// Check to see if head is parent of tail,
+		// while also marking tail chain to easily detect last common ancestor.
+		var n = m.tail;
+		while (n.parent != null) {
+			n = n.parent;
+			if (n == m.head)
+				throw "Head of movement is parent of tail.";
+			n.tail_chain = 1;
+		}
+		
+		// Find the max height intervening between tail and head.
+		// First, must find the last common ancestor.
+		n = m.head;
+		m.lca = null;
+		while (n.parent != null) {
+			n = n.parent;
+			if (n.tail_chain) {
+				m.lca = n;
+				break;
+			}
+		}
+		if (m.lca == null)
+			throw "Could not find common ancestor.";
+		
+		m.dest_x = m.head.x;
+		m.dest_y = m.head.max_height * vert_space;
+		m.bottom_y = (m.lca.max_height + 1) * vert_space;
 	}
 }
