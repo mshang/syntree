@@ -14,16 +14,19 @@ var font_size;
 var font_style;
 var tree_height = 0;
 var ctx;
+var root;
 
 function Node() {
-	this.type = null;
+	this.type = null; // "text" or "element"
 	this.value = null;
-	this.step = null;
-	this.is_phrase = null;
-	this.label = null;
-	this.tail = null;
-	this.height = null;
+	this.step = null; // Horizontal distance between children.
+	this.is_phrase = null; // Should draw triangle?
+	this.label = null; // Head of movement.
+	this.tail = null; // Tail of movement.
+	this.height = null; // Distance from root, where root has height 0.
+	this.max_height = null; // Distance of the descendent of this node that is farthest from root.
 	this.children = new Array();
+	this.parent = null;
 }
 
 function go() {
@@ -47,7 +50,7 @@ function go() {
 	var str = document.f.i.value;
 
 	str = close_brackets(str);
-	var root = parse(str);
+	root = parse(str, null);
 	root.check_phrase();
 	alert(JSON.stringify(root));
 
@@ -123,8 +126,9 @@ Node.prototype.get_tail = function(str) {
 	return str;
 }
 
-function parse(str) {
+function parse(str, parent) {
 	var n = new Node();
+	n.parent = parent;
 	
 	if (str[0] != "[") { // Text node
 		n.type = "text";
@@ -234,8 +238,15 @@ Node.prototype.find_height = function(h) {
 		tree_height = h;
 	}
 	
+	this.max_height = 0;
+	if (this.children.length == 0) {
+		this.max_height = height;
+	}
+	
 	for (var i = 0; i < this.children.length; i++) {
 		this.children[i].find_height(h + 1);
+		if (this.max_height < this.children[i].max_height)
+			this.max_height = this.children[i].max_height;
 	}
 }
 
@@ -244,6 +255,9 @@ Node.prototype.draw = function(x, y) {
 	
 	if (this.type == "text") {
 		ctx.fillText(this.value, x, y);
+		if (this.tail != null) {
+			this.draw_movement(x, y);
+		}
 		return;
 	}
 	
@@ -267,5 +281,34 @@ Node.prototype.draw = function(x, y) {
 			ctx.lineTo(left_start + i*(this.step), y + vert_space - font_size * 1.2);
 			ctx.stroke();
 		}
+	}
+}
+
+Node.prototype.draw_movement = function(x, y) {
+	var head = root.find_head(this.tail);
+	if (head == null)
+		throw "Head of movement not found.";
+	// Make sure head is not parent of this node.
+	Node n = this;
+	while (n.parent != null) {
+		n = n.parent;
+		if (n == head) {
+			throw "Head of movement is parent of tail.";
+	}
+	// Find the max height intervening between tail and head.
+	
+}
+
+Node.prototype.find_head = function(label) {
+	for (var i = 0; i < this.children.length; i++) {
+		var res = children[i].find_head(label);
+		if (res != null)
+			return res;
+	}
+	
+	if (this.label == label) {
+		return this;
+	} else {
+		return null;
 	}
 }
