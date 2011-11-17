@@ -330,6 +330,14 @@ function draw_movement() {
 		ctx.quadraticCurveTo(m.tail.x, m.bottom_y, (m.tail.x + m.dest_x) / 2, m.bottom_y);
 		ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + space_below_text);
 		ctx.stroke();
+		// Arrowhead
+		ctx.beginPath();
+		ctx.lineTo(m.dest_x + 3, m.dest_y + space_below_text + 10);
+		ctx.lineTo(m.dest_x - 3, m.dest_y + space_below_text + 10);
+		ctx.lineTo(m.dest_x, m.dest_y + space_below_text);
+		ctx.closePath();
+		ctx.fillStyle = "#000000";
+		ctx.fill();
 	}
 }
 
