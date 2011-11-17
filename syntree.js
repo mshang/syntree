@@ -1,6 +1,6 @@
 
 /* TODO:
- *
+ * Quotation marks to ignore special characters.
  * Deal with empty categories.
  * 
  */
@@ -245,25 +245,31 @@ Node.prototype.set_width = function() {
 	if (this.type == "text") {
 		this.left_width = val_width / 2;
 		this.right_width = val_width / 2;
-	} else {
+		return;
+	}
 	
-		// Figure out how wide apart the children should be placed.
-		// The spacing between them should be equal.
-		this.step = 0;
-		for (var i = 0; i < length - 1; i++) {
-			var space = this.children[i].right_width + hor_space + this.children[i+1].left_width;
-			if (space > this.step) {
-				this.step = space;
-			}
+	// Figure out how wide apart the children should be placed.
+	// The spacing between them should be equal.
+	this.step = 0;
+	for (var i = 0; i < length - 1; i++) {
+		var space = this.children[i].right_width + hor_space + this.children[i+1].left_width;
+		if (space > this.step) {
+			this.step = space;
 		}
-		
+	}
+	
+	this.left_width = 0.0;
+	this.right_width = 0.0;
+	
+	if (length > 0) {
 		var sub = ((length - 1) / 2) * this.step;
 		this.left_width = sub + this.children[0].left_width;
 		this.right_width = sub + this.children[length-1].right_width;
-		
-		this.left_width = Math.max(this.left_width, val_width / 2);
-		this.right_width = Math.max(this.right_width, val_width / 2);
 	}
+	
+	this.left_width = Math.max(this.left_width, val_width / 2);
+	this.right_width = Math.max(this.right_width, val_width / 2);
+
 }
 
 Node.prototype.find_height = function(h) {
