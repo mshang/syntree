@@ -8,6 +8,8 @@
 
 var debug = 1;
 var padding = 15; // Number of pixels from tree to edge on each side.
+var space_above_text = 4; // Lines will end this may pixels above text.
+var space_below_text = 4;
 var vert_space;
 var hor_space;
 var font_size;
@@ -306,16 +308,16 @@ Node.prototype.draw = function() {
 	// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
 	if ((length == 1) && (this.children[0].type == "text") && (this.is_phrase)) {
 		var child = this.children[0];
-		ctx.moveTo(this.x, this.y + font_size * 0.2);
-		ctx.lineTo(child.x - child.left_width, child.y - font_size * 1.2);
-		ctx.lineTo(child.x + child.right_width, child.y - font_size * 1.2);
-		ctx.lineTo(this.x, this.y + font_size * 0.2);
+		ctx.moveTo(this.x, this.y + space_below_text);
+		ctx.lineTo(child.x - child.left_width, child.y - font_size - space_above_text);
+		ctx.lineTo(child.x + child.right_width, child.y - font_size - space_above_text);
+		ctx.lineTo(this.x, this.y + space_below_text);
 		ctx.stroke();
 	} else { // Draw lines to all children
 		for (var i = 0; i < length; i++) {
 			var child = this.children[i];
-			ctx.moveTo(this.x, this.y + font_size * 0.2);
-			ctx.lineTo(child.x, child.y - font_size * 1.2);
+			ctx.moveTo(this.x, this.y + space_below_text);
+			ctx.lineTo(child.x, child.y - font_size - space_above_text);
 			ctx.stroke();
 		}
 	}
@@ -324,9 +326,9 @@ Node.prototype.draw = function() {
 function draw_movement() {
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
-		ctx.moveTo(m.tail.x, m.tail.y + font_size * 0.2);
+		ctx.moveTo(m.tail.x, m.tail.y + space_below_text);
 		ctx.quadraticCurveTo(m.tail.x, m.bottom_y, (m.tail.x + m.dest_x) / 2, m.bottom_y);
-		ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + font_size * 0.2);
+		ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + space_below_text);
 		ctx.stroke();
 	}
 }
@@ -402,7 +404,7 @@ function set_window_height() {
 	// Problem: movement lines may protrude from bottom.
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
-		if (m.bottom_y >= h)
+		if (m.lca.max_height == root.max_height)
 			h += vert_space;
 	}
 	return h;
