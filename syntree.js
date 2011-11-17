@@ -21,7 +21,7 @@ function Node() {
 	this.type = null; // "text" or "element"
 	this.value = null;
 	this.step = null; // Horizontal distance between children.
-	this.is_phrase = null; // Should draw triangle?
+	this.draw_triangle = null;
 	this.label = null; // Head of movement.
 	this.tail = null; // Tail of movement.
 	this.height = null; // Distance from root, where root has height 0.
@@ -221,11 +221,16 @@ function parse(str, parent) {
 }
 
 Node.prototype.check_phrase = function() {
-	this.is_phrase = 0;
+	this.draw_triangle = 0;
 
-	if (this.type == "element") {
-		if ((this.value[this.value.length-1] == "P") && (this.value.length > 1))
-			this.is_phrase = 1;
+	if ((this.type == "element") &&
+		(this.children.length == 1) &&
+		(this.children[0].type == "text") &&
+		(this.value[this.value.length-1] == "P") &&
+		(this.value.length > 1) &&
+		(this.children[0].value != "tr") &&
+		(this.children[0].value != "t")) {
+			this.draw_triangle = 1;
 	}
 
 	for (var i = 0; i < this.children.length; i++) {
@@ -314,8 +319,7 @@ Node.prototype.draw = function() {
 		this.children[i].draw();
 	}
 	
-	// If there is only one child, it is a text node, and I am a phrase node, draw triangle.
-	if ((length == 1) && (this.children[0].type == "text") && (this.is_phrase)) {
+	if (this.draw_triangle) {
 		var child = this.children[0];
 		ctx.moveTo(this.x, this.y + space_below_text);
 		ctx.lineTo(child.x - child.left_width, child.y - font_size - space_above_text);
