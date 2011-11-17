@@ -328,8 +328,8 @@ function draw_movement() {
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
 		ctx.moveTo(m.tail.x, m.tail.y + font_size * 0.2);
-		ctx.lineTo((m.tail.x + m.dest_x) / 2, m.bottom_y);
-		ctx.lineTo(m.dest_x, m.dest_y + font_size * 0.2);
+		ctx.quadraticCurveTo(m.tail.x, m.bottom_y, (m.tail.x + m.dest_x) / 2, m.bottom_y);
+		ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + font_size * 0.2);
 		ctx.stroke();
 	}
 }
