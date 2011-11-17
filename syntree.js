@@ -1,12 +1,8 @@
 
 /* TODO:
- * Movement:
- * Destinations labelled with _# directly after closing square bracket (e.g. [NP Miles]_1)
- * Only numeric labels.
- * Sources indicated with <#> anywhere within text.
- * Make sure that destination is not parent of source.
  *
  * Take widths of categories into consideration.
+ * Deal with empty categories.
  * 
  */
 
