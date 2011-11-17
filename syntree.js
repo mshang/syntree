@@ -7,6 +7,7 @@
  */
 
 var debug = 1;
+var padding = 15; // Number of pixels from tree to edge on each side.
 var vert_space;
 var hor_space;
 var font_size;
@@ -87,7 +88,7 @@ function go() {
 }
 
 function set_up_canvas() {
-	var width = 1.2 * (root.left_width + root.right_width);
+	var width = root.left_width + root.right_width + 2 * padding;
 	var height = set_window_height();
 	// Make a new canvas. Required for IE compatability.
 	var canvas = document.createElement("canvas");
@@ -101,8 +102,8 @@ function set_up_canvas() {
 	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
-	var x_shift = root.left_width + 0.1 * (root.left_width + root.right_width);
-	var y_shift = 0.3 * (height / root.max_height) + font_size/2;
+	var x_shift = root.left_width + padding;
+	var y_shift = parseInt(font_size) + padding;
 	ctx.translate(x_shift, y_shift);
 }
 
@@ -397,12 +398,12 @@ function set_up_movement() {
 }
 
 function set_window_height() {
-	var h = (root.max_height + 1) * vert_space;
+	var h = (root.max_height) * vert_space + parseInt(font_size) + 2 * padding;
 	// Problem: movement lines may protrude from bottom.
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
 		if (m.bottom_y >= h)
-			h = (root.max_height + 2) * vert_space;
+			h += vert_space;
 	}
 	return h;
 }
