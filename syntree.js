@@ -1,7 +1,6 @@
 
 /* TODO:
  *
- * Take widths of categories into consideration.
  * Deal with empty categories.
  * 
  */
@@ -237,14 +236,15 @@ Node.prototype.check_phrase = function() {
 Node.prototype.set_width = function() {
 
 	var length = this.children.length;
+	var val_width = ctx.measureText(this.value).width;
 
 	for (var i = 0; i < length; i++) {
 		this.children[i].set_width();
 	}
 	
 	if (this.type == "text") {
-		this.left_width = ctx.measureText(this.value).width / 2;
-		this.right_width = this.left_width;
+		this.left_width = val_width / 2;
+		this.right_width = val_width / 2;
 	} else {
 	
 		// Figure out how wide apart the children should be placed.
@@ -260,6 +260,9 @@ Node.prototype.set_width = function() {
 		var sub = ((length - 1) / 2) * this.step;
 		this.left_width = sub + this.children[0].left_width;
 		this.right_width = sub + this.children[length-1].right_width;
+		
+		this.left_width = Math.max(this.left_width, val_width / 2);
+		this.right_width = Math.max(this.right_width, val_width / 2);
 	}
 }
 
