@@ -1,7 +1,8 @@
 
 /* TODO:
  * Quotation marks to ignore special characters.
- * Deal with empty categories.
+ * Should use a real parser / lexer, maybe regex
+ * Syntactic sugar for for loops using Node.nextChild.
  * 
  */
 
@@ -30,6 +31,8 @@ function Node() {
 	this.parent = null;
 	this.x = null; // Where the node will eventually be drawn.
 	this.y = null;
+	this.head_chain = null;
+	this.tail_chain = null;
 }
 
 function MovementLine() {
@@ -39,6 +42,7 @@ function MovementLine() {
 	this.dest_x = null;
 	this.dest_y = null;
 	this.bottom_y = null;
+	this.max_height = null;
 }
 
 function handler() {
@@ -393,6 +397,7 @@ function set_up_movement() {
 		// Check to see if head is parent of tail,
 		// while also marking tail chain to easily detect last common ancestor.
 		var n = m.tail;
+		n.tail_chain = 1;
 		while (n.parent != null) {
 			n = n.parent;
 			if (n == m.head)
@@ -400,12 +405,13 @@ function set_up_movement() {
 			n.tail_chain = 1;
 		}
 		
-		// Find the max height intervening between tail and head.
-		// First, must find the last common ancestor.
+		// Find the last common ancestor.
 		n = m.head;
+		n.head_chain = 1;
 		m.lca = null;
 		while (n.parent != null) {
 			n = n.parent;
+			n.head_chain = 1;
 			if (n.tail_chain) {
 				m.lca = n;
 				break;
@@ -414,10 +420,69 @@ function set_up_movement() {
 		if (m.lca == null)
 			throw "Could not find common ancestor.";
 		
+		// Find out the greatest intervening height.
+		m.max_height = 0;
+		n = m.lca;
+		var i = 0;
+		for (; i < n.children.length; i++) {
+			if ((n.children[i].head_chain) || (n.children[i].tail_chain)) {
+				m.max_height = Math.max(n.children[i].find_intervening_height("right"), m.max_height);
+				i++;
+				break;
+			}
+		}
+		
+		for (; i < n.children.length; i++) {
+			if ((n.children[i].head_chain) || (n.children[i].tail_chain)) {
+				m.max_height = Math.max(n.children[i].find_intervening_height("left"), m.max_height);
+				break;
+			} else {
+				m.max_height = Math.max(n.children[i].find_intervening_height("all"), m.max_height);
+			}
+		}
+		
 		m.dest_x = m.head.x;
 		m.dest_y = m.head.max_height * vert_space;
-		m.bottom_y = (m.lca.max_height + 1) * vert_space;
+		m.bottom_y = (m.max_height + 1) * vert_space;
 	}
+}
+
+Node.prototype.find_intervening_height = function(direction) {
+	var length = this.children.length;
+	var max_height = this.height;
+	
+	if (length == 0) {
+		return this.height;
+	}
+	
+	if (direction == "all") {
+		for (var i = 0; i < length; i++) {
+			max_height = Math.max(this.children[i].find_intervening_height("all"), max_height);
+		}
+		return max_height;
+	}
+	
+	var i = 0;
+	for (; i < length; i++) {
+		if ((this.children[i].head_chain) || (this.children[i].tail_chain)) {
+			max_height = Math.max(this.children[i].find_intervening_height(direction), max_height);
+			break;
+		}
+	}
+	
+	if (direction == "right")
+		i++;
+	if (direction == "left")
+		i--;
+	while ((i>=0) && (i < length)) {
+		max_height = Math.max(this.children[i].find_intervening_height("all"), max_height);
+		if (direction == "right")
+			i++;
+		if (direction == "left")
+			i--;
+	}
+	
+	return max_height;
 }
 
 function set_window_height() {
@@ -425,7 +490,7 @@ function set_window_height() {
 	// Problem: movement lines may protrude from bottom.
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
-		if (m.lca.max_height == root.max_height)
+		if (m.max_height == root.max_height)
 			h += vert_space;
 	}
 	return h;
