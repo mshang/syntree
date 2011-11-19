@@ -89,7 +89,7 @@ function go() {
 	// Initialize the various options.
 	vert_space = parseInt(document.f.vertspace.value);
 	hor_space = parseInt(document.f.horspace.value);
-	font_size = document.f.fontsize.value;
+	font_size = parseInt(document.f.fontsize.value);
 	for (var i = 0; i < 3; i++) {
 		if (document.f.fontstyle[i].checked) font_style = document.f.fontstyle[i].value;
 	}
@@ -105,6 +105,7 @@ function go() {
 
 	str = close_brackets(str);
 	root = parse(str, null);
+	root.set_siblings();
 	root.check_phrase();
 
 	// Find out dimensions of the tree.
@@ -137,7 +138,7 @@ function set_up_canvas() {
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
 	var x_shift = root.left_width + padding;
-	var y_shift = parseInt(font_size) + padding;
+	var y_shift = font_size + padding;
 	ctx.translate(x_shift, y_shift);
 }
 
@@ -273,12 +274,10 @@ Node.prototype.check_phrase = function() {
 
 Node.prototype.set_width = function() {
 
-	var length = this.children.length;
 	var val_width = ctx.measureText(this.value).width;
 
-	for (var i = 0; i < length; i++) {
-		this.children[i].set_width();
-	}
+	for (var child = this.first; child != null; child = child.next)
+		child.set_width();
 	
 	if (this.type == "text") {
 		this.left_width = val_width / 2;
@@ -289,20 +288,18 @@ Node.prototype.set_width = function() {
 	// Figure out how wide apart the children should be placed.
 	// The spacing between them should be equal.
 	this.step = 0;
-	for (var i = 0; i < length - 1; i++) {
-		var space = this.children[i].right_width + hor_space + this.children[i+1].left_width;
-		if (space > this.step) {
-			this.step = space;
-		}
+	for (var child = this.first; (child != null) && (child.next != null); child = child.next) {
+		var space = child.right_width + hor_space + child.next.left_width;
+		this.step = Math.max(this.step, space);
 	}
 	
 	this.left_width = 0.0;
 	this.right_width = 0.0;
 	
-	if (length > 0) {
-		var sub = ((length - 1) / 2) * this.step;
-		this.left_width = sub + this.children[0].left_width;
-		this.right_width = sub + this.children[length-1].right_width;
+	if (this.has_children()) {
+		var sub = ((this.children.length - 1) / 2) * this.step;
+		this.left_width = sub + this.first.left_width;
+		this.right_width = sub + this.last.right_width;
 	}
 	
 	this.left_width = Math.max(this.left_width, val_width / 2);
@@ -515,7 +512,7 @@ Node.prototype.find_intervening_height = function(direction) {
 }
 
 function set_window_height() {
-	var h = (root.max_height) * vert_space + parseInt(font_size) + 2 * padding;
+	var h = (root.max_height) * vert_space + font_size + 2 * padding;
 	// Problem: movement lines may protrude from bottom.
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
