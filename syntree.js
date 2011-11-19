@@ -189,13 +189,9 @@ function parse(str) {
 	if (str[0] != "[") { // Text node
 		n.type = "text";
 		str = n.get_tail(str);
-		var i = 0;
-		while (str[i] == " ")
-			i++;
-		var j = str.length - 1;
-		while (str[j] == " ")
-			j--;
-		n.value = str.substring(i, j+1);
+		str = str.replace(/^\s+/, "");
+		str = str.replace(/\s+$/, "");
+		n.value = str;
 		return n;
 	}
 	
