@@ -19,6 +19,8 @@ var ctx;
 var root;
 var movement_lines = new Array();
 
+
+
 function Node() {
 	this.type = null; // "text" or "element"
 	this.value = null;
@@ -72,6 +74,8 @@ function MovementLine() {
 	this.bottom_y = null;
 	this.max_height = null;
 }
+
+
 
 function handler() {
 	if (debug) {
@@ -150,6 +154,8 @@ function swap_out_image() {
 	ctx.canvas.style.display = "none";
 }
 
+
+
 function close_brackets(str) {
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
@@ -167,26 +173,13 @@ function close_brackets(str) {
 
 Node.prototype.get_tail = function(str) {
 	// Get any movement information.
-	// Make sure to collapse any spaces around <X> to one space, even if there is no space.
-	for (var i = 0; i < str.length; i++) {
-		if (str[i] == "<") {
-			var j = i;
-			while ((j < str.length) && (str[j] != ">"))
-				j++;
-			if (j == str.length)
-				throw "Did not find matching angle bracket.";
-			if (i+1 < j)
-				this.tail = str.substring(i+1, j);
-			// i lies on "<", j lies on ">"
-			i--;
-			while (str[i] == " ")
-				i--;
-			j++;
-			while (str[j] == " ")
-				j++;
-			return str.substring(0, i+1) + " " + str.substring(j);
-		}
-	}
+	// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
+	var n = this;
+	str.replace(/\s*<(\w+)>\s*/, 
+	function(match, tail) {
+		n.tail = tail;
+		return " ";
+	});
 	return str;
 }
 
@@ -251,6 +244,8 @@ function parse(str) {
 	
 	return n;
 }
+
+
 
 Node.prototype.check_phrase = function() {
 	this.draw_triangle = 0;
@@ -322,6 +317,8 @@ Node.prototype.find_height = function() {
 	}
 }
 
+
+
 Node.prototype.assign_location = function(x, y) {
 	this.x = x;
 	this.y = y;
@@ -378,6 +375,8 @@ function draw_movement() {
 		ctx.fill();
 	}
 }
+
+
 
 Node.prototype.find_head = function(label) {
 	for (var child = this.first; child != null; child = child.next) {
