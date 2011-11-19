@@ -3,6 +3,8 @@
  * Quotation marks to ignore special characters.
  * Should use a real parser / lexer, maybe regex
  * Syntactic sugar for for loops using Node.nextChild.
+ * Deal with empty text nodes due to <> tags.
+ * Add control points for movement lines below corners of lowest hanging intervening nodes.
  * 
  */
 
@@ -28,11 +30,38 @@ function Node() {
 	this.height = null; // Distance from root, where root has height 0.
 	this.max_height = null; // Distance of the descendent of this node that is farthest from root.
 	this.children = new Array();
+	this.first = null;
+	this.last = null;
 	this.parent = null;
+	this.next = null;
+	this.previous = null;
 	this.x = null; // Where the node will eventually be drawn.
 	this.y = null;
 	this.head_chain = null;
 	this.tail_chain = null;
+}
+
+Node.prototype.has_children = function() {
+	return (this.children.length > 0);
+}
+
+Node.prototype.set_siblings = function() {
+	for (var i = 0; i < this.children.length; i++) {
+		this.children[i].set_siblings();
+	}
+	
+	if (this.has_children()) {
+		this.first = this.children[0];
+		this.last = this.children[this.children.length - 1];
+	}
+	
+	for (var i = 0; i < this.children.length - 1; i++) {
+		this.children[i].next = this.children[i+1];
+	}
+	
+	for (var i = 1; i < this.children.length; i++) {
+		this.children[i].previous = this.children[i-1];
+	}
 }
 
 function MovementLine() {
