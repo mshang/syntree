@@ -2,15 +2,14 @@
 /* TODO:
  * Quotation marks to ignore special characters.
  * Should use a real parser / lexer, maybe regex
- * Syntactic sugar for for loops using Node.nextChild.
- * Deal with empty text nodes due to <> tags.
+ * Deal with empty text nodes due to <> tags. Deal with this in lexer.
  * Add control points for movement lines below corners of lowest hanging intervening nodes.
  * 
  */
 
 var debug = 1;
 var padding = 15; // Number of pixels from tree to edge on each side.
-var space_above_text = 4; // Lines will end this may pixels above text.
+var space_above_text = 4; // Lines will end this many pixels above text.
 var space_below_text = 4;
 var vert_space;
 var hor_space;
@@ -42,12 +41,13 @@ function Node() {
 	this.tail_chain = null;
 }
 
-Node.prototype.set_siblings = function() {
+Node.prototype.set_siblings = function(parent) {
 	for (var i = 0; i < this.children.length; i++) {
-		this.children[i].set_siblings();
+		this.children[i].set_siblings(this);
 	}
 	
 	this.has_children = (this.children.length > 0);
+	this.parent = parent;
 	
 	if (this.has_children) {
 		this.first = this.children[0];
@@ -103,8 +103,8 @@ function go() {
 	var str = document.f.i.value;
 
 	str = close_brackets(str);
-	root = parse(str, null);
-	root.set_siblings();
+	root = parse(str);
+	root.set_siblings(null);
 	root.check_phrase();
 
 	// Find out dimensions of the tree.
@@ -190,9 +190,8 @@ Node.prototype.get_tail = function(str) {
 	return str;
 }
 
-function parse(str, parent) {
+function parse(str) {
 	var n = new Node();
-	n.parent = parent;
 	
 	if (str[0] != "[") { // Text node
 		n.type = "text";
@@ -226,7 +225,7 @@ function parse(str, parent) {
 				level--;
 			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
 				if (str.substring(start, i).search(/\w/) > -1) {
-					n.children.push(parse(str.substring(start, i), n));
+					n.children.push(parse(str.substring(start, i)));
 				}
 				start = i;
 			}
@@ -237,7 +236,7 @@ function parse(str, parent) {
 						i++;
 					i--;
 				}
-				n.children.push(parse(str.substring(start, i+1), n));
+				n.children.push(parse(str.substring(start, i+1)));
 				start = i+1;
 			}
 		}
@@ -258,16 +257,16 @@ Node.prototype.check_phrase = function() {
 
 	if ((this.type == "element") &&
 		(this.children.length == 1) &&
-		(this.children[0].type == "text") &&
+		(this.first.type == "text") &&
 		(this.value[this.value.length-1] == "P") &&
 		(this.value.length > 1) &&
-		(this.children[0].value != "tr") &&
-		(this.children[0].value != "t")) {
+		(this.first.value != "tr") &&
+		(this.first.value != "t")) {
 			this.draw_triangle = 1;
 	}
 
-	for (var i = 0; i < this.children.length; i++) {
-		this.children[i].check_phrase();
+	for (var child = this.first; child != null; child = child.next) {
+		child.check_phrase();
 	}
 }
 
