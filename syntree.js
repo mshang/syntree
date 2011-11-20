@@ -164,21 +164,36 @@ function close_brackets(str) {
 		if (str[i] == "]")
 			open--;
 	}
+	if (open < 0)
+		throw "Too many open brackets.";
 	while (open > 0) {
 		str = str + "]";
 		open--;
 	}
+	// Add spaces to deal with [X[
+	str = str.replace(/\[(\w+)\]/,
+	function(match, cat) {
+		return "[" + cat + " [";
+	});
 	return str;
 }
 
-Node.prototype.get_tail = function(str) {
+function get_tail(n, str) {
 	// Get any movement information.
 	// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
-	var n = this;
-	str.replace(/\s*<(\w+)>\s*/, 
+	str = str.replace(/\s*<(\w+)>\s*/, 
 	function(match, tail) {
 		n.tail = tail;
 		return " ";
+	});
+	return str;
+}
+
+function get_label(n, str) {
+	str = str.replace(/_(\w+)$/, 
+	function(match, label) {
+		n.label = label;
+		return "";
 	});
 	return str;
 }
@@ -188,14 +203,32 @@ function parse(str) {
 	
 	if (str[0] != "[") { // Text node
 		n.type = "text";
-		str = n.get_tail(str);
+		str = get_tail(n, str);
 		str = str.replace(/^\s+/, "");
 		str = str.replace(/\s+$/, "");
 		n.value = str;
 		return n;
 	}
-	
+	/*
 	// Element node.
+	n.type = "element";
+	str = get_label(n, str);
+	// Try to match for empty element node.
+	var arr = str.match(^/\[\s*(\w+)\s*\]/$);
+	if ((arr != null) && (arr.length == 2)) {
+		n.value = arr[1];
+		return n;
+	}
+	
+	arr = str.match(/^\[(\w+)\s+(.+)\]/$);
+	if ((arr != null) && (arr.length == 3)) {
+		n.value == arr[1];
+		
+		return n;
+	}
+	
+	throw "Could not match in parser.";
+	*/
 	n.type = "element";
 	var i = 1;
 	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]"))
@@ -239,6 +272,7 @@ function parse(str) {
 		n.label = str.substring(j+2);
 	
 	return n;
+	
 }
 
 
