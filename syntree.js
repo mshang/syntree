@@ -406,8 +406,17 @@ Node.prototype.find_movement = function() {
 	}
 }
 
+Node.prototype.reset_chains = function() {
+	this.head_chain = null;
+	this.tail_chain = null;
+	
+	for (var child = this.first; child != null; child = child.next)
+		child.reset_chains();
+}
+
 function set_up_movement() {
 	for (var i = 0; i < movement_lines.length; i++) {
+		root.reset_chains();
 		movement_lines[i].set_up();
 	}
 }
