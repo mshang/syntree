@@ -357,27 +357,28 @@ Node.prototype.draw = function() {
 	}
 }
 
+MovementLine.prototype.draw = function() {
+	ctx.moveTo(this.tail.x, this.tail.y + space_below_text);
+	ctx.quadraticCurveTo(this.tail.x, this.bottom_y, (this.tail.x + this.dest_x) / 2, this.bottom_y);
+	ctx.quadraticCurveTo(this.dest_x, this.bottom_y, this.dest_x, this.dest_y + space_below_text);
+	ctx.stroke();
+	// Arrowhead
+	ctx.beginPath();
+	ctx.lineTo(this.dest_x + 3, this.dest_y + space_below_text + 10);
+	ctx.lineTo(this.dest_x - 3, this.dest_y + space_below_text + 10);
+	ctx.lineTo(this.dest_x, this.dest_y + space_below_text);
+	ctx.closePath();
+	ctx.fillStyle = "#000000";
+	ctx.fill();
+}
+
 function draw_movement() {
 	for (var i = 0; i < movement_lines.length; i++) {
-	var m = movement_lines[i];
-		if (m.should_draw) {
-			ctx.moveTo(m.tail.x, m.tail.y + space_below_text);
-			ctx.quadraticCurveTo(m.tail.x, m.bottom_y, (m.tail.x + m.dest_x) / 2, m.bottom_y);
-			ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + space_below_text);
-			ctx.stroke();
-			// Arrowhead
-			ctx.beginPath();
-			ctx.lineTo(m.dest_x + 3, m.dest_y + space_below_text + 10);
-			ctx.lineTo(m.dest_x - 3, m.dest_y + space_below_text + 10);
-			ctx.lineTo(m.dest_x, m.dest_y + space_below_text);
-			ctx.closePath();
-			ctx.fillStyle = "#000000";
-			ctx.fill();
+		if (movement_lines[i].should_draw) {
+			movement_lines[i].draw();
 		}
 	}
 }
-
-
 
 Node.prototype.find_head = function(label) {
 	for (var child = this.first; child != null; child = child.next) {
