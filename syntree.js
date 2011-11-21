@@ -170,11 +170,6 @@ function close_brackets(str) {
 		str = str + "]";
 		open--;
 	}
-	// Add spaces to deal with [X[
-	str = str.replace(/\[(\w+)\]/,
-	function(match, cat) {
-		return "[" + cat + " [";
-	});
 	return str;
 }
 
@@ -209,27 +204,9 @@ function parse(str) {
 		n.value = str;
 		return n;
 	}
-	/*
-	// Element node.
+
 	n.type = "element";
 	str = get_label(n, str);
-	// Try to match for empty element node.
-	var arr = str.match(^/\[\s*(\w+)\s*\]/$);
-	if ((arr != null) && (arr.length == 2)) {
-		n.value = arr[1];
-		return n;
-	}
-	
-	arr = str.match(/^\[(\w+)\s+(.+)\]/$);
-	if ((arr != null) && (arr.length == 3)) {
-		n.value == arr[1];
-		
-		return n;
-	}
-	
-	throw "Could not match in parser.";
-	*/
-	n.type = "element";
 	var i = 1;
 	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]"))
 		i++;
@@ -263,16 +240,7 @@ function parse(str) {
 			}
 		}
 	}
-	
-	var j = str.length-1;
-	while (str[j] != "]")
-		j--;
-	// j sits on "]", j+1 sits on "_", so the label is j+2 to the end
-	if (j+2 < str.length)
-		n.label = str.substring(j+2);
-	
 	return n;
-	
 }
 
 
