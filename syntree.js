@@ -73,6 +73,7 @@ function MovementLine() {
 	this.dest_y = null;
 	this.bottom_y = null;
 	this.max_height = null;
+	this.should_draw = null;
 }
 
 
@@ -358,19 +359,21 @@ Node.prototype.draw = function() {
 
 function draw_movement() {
 	for (var i = 0; i < movement_lines.length; i++) {
-		var m = movement_lines[i];
-		ctx.moveTo(m.tail.x, m.tail.y + space_below_text);
-		ctx.quadraticCurveTo(m.tail.x, m.bottom_y, (m.tail.x + m.dest_x) / 2, m.bottom_y);
-		ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + space_below_text);
-		ctx.stroke();
-		// Arrowhead
-		ctx.beginPath();
-		ctx.lineTo(m.dest_x + 3, m.dest_y + space_below_text + 10);
-		ctx.lineTo(m.dest_x - 3, m.dest_y + space_below_text + 10);
-		ctx.lineTo(m.dest_x, m.dest_y + space_below_text);
-		ctx.closePath();
-		ctx.fillStyle = "#000000";
-		ctx.fill();
+	var m = movement_lines[i];
+		if (m.should_draw) {
+			ctx.moveTo(m.tail.x, m.tail.y + space_below_text);
+			ctx.quadraticCurveTo(m.tail.x, m.bottom_y, (m.tail.x + m.dest_x) / 2, m.bottom_y);
+			ctx.quadraticCurveTo(m.dest_x, m.bottom_y, m.dest_x, m.dest_y + space_below_text);
+			ctx.stroke();
+			// Arrowhead
+			ctx.beginPath();
+			ctx.lineTo(m.dest_x + 3, m.dest_y + space_below_text + 10);
+			ctx.lineTo(m.dest_x - 3, m.dest_y + space_below_text + 10);
+			ctx.lineTo(m.dest_x, m.dest_y + space_below_text);
+			ctx.closePath();
+			ctx.fillStyle = "#000000";
+			ctx.fill();
+		}
 	}
 }
 
@@ -402,61 +405,67 @@ Node.prototype.find_movement = function() {
 	}
 }
 
+MovementLine.prototype.set_up = function() {
+	this.should_draw = 0;
+	if ((this.tail == null) || (this.head == null))
+		return;
+	// Check to see if head is parent of tail,
+	// while also marking tail chain to easily detect last common ancestor.
+	var n = this.tail;
+	n.tail_chain = 1;
+	while (n.parent != null) {
+		n = n.parent;
+		if (n == this.head)
+			return;
+		n.tail_chain = 1;
+	}
+	
+	// Find the last common ancestor.
+	n = this.head;
+	n.head_chain = 1;
+	this.lca = null;
+	while (n.parent != null) {
+		n = n.parent;
+		n.head_chain = 1;
+		if (n.tail_chain) {
+			this.lca = n;
+			break;
+		}
+	}
+	if (this.lca == null)
+		return;
+	
+	// Find out the greatest intervening height.
+	this.max_height = 0;
+	n = this.lca;
+	var child = n.first;
+	for (; child != null; child = child.next) {
+		if ((child.head_chain) || (child.tail_chain)) {
+			this.max_height = Math.max(child.find_intervening_height("right"), this.max_height);
+			child = child.next;
+			break;
+		}
+	}
+	
+	for (; child != null; child = child.next) {
+		if ((child.head_chain) || (child.tail_chain)) {
+			this.max_height = Math.max(child.find_intervening_height("left"), this.max_height);
+			break;
+		} else {
+			this.max_height = Math.max(child.find_intervening_height("all"), this.max_height);
+		}
+	}
+	
+	this.dest_x = this.head.x;
+	this.dest_y = this.head.max_height * vert_space;
+	this.bottom_y = (this.max_height + 1) * vert_space;
+	this.should_draw = 1;
+	return;
+}
+
 function set_up_movement() {
 	for (var i = 0; i < movement_lines.length; i++) {
-		var m = movement_lines[i];
-		if ((m.tail == null) || (m.head == null))
-			throw "Null head or tail.";
-		// Check to see if head is parent of tail,
-		// while also marking tail chain to easily detect last common ancestor.
-		var n = m.tail;
-		n.tail_chain = 1;
-		while (n.parent != null) {
-			n = n.parent;
-			if (n == m.head)
-				throw "Head of movement is parent of tail.";
-			n.tail_chain = 1;
-		}
-		
-		// Find the last common ancestor.
-		n = m.head;
-		n.head_chain = 1;
-		m.lca = null;
-		while (n.parent != null) {
-			n = n.parent;
-			n.head_chain = 1;
-			if (n.tail_chain) {
-				m.lca = n;
-				break;
-			}
-		}
-		if (m.lca == null)
-			throw "Could not find common ancestor.";
-		
-		// Find out the greatest intervening height.
-		m.max_height = 0;
-		n = m.lca;
-		var child = n.first;
-		for (; child != null; child = child.next) {
-			if ((child.head_chain) || (child.tail_chain)) {
-				m.max_height = Math.max(child.find_intervening_height("right"), m.max_height);
-				child = child.next;
-				break;
-			}
-		}
-		
-		for (; child != null; child = child.next) {
-			if ((child.head_chain) || (child.tail_chain)) {
-				m.max_height = Math.max(child.find_intervening_height("left"), m.max_height);
-				break;
-			} else {
-				m.max_height = Math.max(child.find_intervening_height("all"), m.max_height);
-			}
-		}
-		
-		m.dest_x = m.head.x;
-		m.dest_y = m.head.max_height * vert_space;
-		m.bottom_y = (m.max_height + 1) * vert_space;
+		movement_lines[i].set_up();
 	}
 }
 
