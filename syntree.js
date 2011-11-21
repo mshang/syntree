@@ -7,7 +7,7 @@
  * 
  */
 
-var debug = 1;
+var debug = 0;
 var padding = 15; // Number of pixels from tree to edge on each side.
 var space_above_text = 4; // Lines will end this many pixels above text.
 var space_below_text = 4;
