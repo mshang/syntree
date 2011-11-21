@@ -406,23 +406,50 @@ Node.prototype.find_movement = function() {
 	}
 }
 
+function set_up_movement() {
+	for (var i = 0; i < movement_lines.length; i++) {
+		movement_lines[i].set_up();
+	}
+}
+
 MovementLine.prototype.set_up = function() {
 	this.should_draw = 0;
 	if ((this.tail == null) || (this.head == null))
 		return;
+	
 	// Check to see if head is parent of tail,
-	// while also marking tail chain to easily detect last common ancestor.
+	if (!this.check_head())
+		return;
+	
+	// Find the last common ancestor.
+	this.find_lca();
+	if (this.lca == null)
+		return;
+	
+	// Find out the greatest intervening height.
+	this.find_intervening_height();
+	
+	this.dest_x = this.head.x;
+	this.dest_y = this.head.max_height * vert_space;
+	this.bottom_y = (this.max_height + 1) * vert_space;
+	this.should_draw = 1;
+	return;
+}
+
+MovementLine.prototype.check_head = function() {
 	var n = this.tail;
 	n.tail_chain = 1;
 	while (n.parent != null) {
 		n = n.parent;
 		if (n == this.head)
-			return;
+			return 0;
 		n.tail_chain = 1;
 	}
-	
-	// Find the last common ancestor.
-	n = this.head;
+	return 1;
+}
+
+MovementLine.prototype.find_lca = function() {
+	var n = this.head;
 	n.head_chain = 1;
 	this.lca = null;
 	while (n.parent != null) {
@@ -433,12 +460,11 @@ MovementLine.prototype.set_up = function() {
 			break;
 		}
 	}
-	if (this.lca == null)
-		return;
-	
-	// Find out the greatest intervening height.
+}
+
+MovementLine.prototype.find_intervening_height = function() {
 	this.max_height = 0;
-	n = this.lca;
+	var n = this.lca;
 	var child = n.first;
 	for (; child != null; child = child.next) {
 		if ((child.head_chain) || (child.tail_chain)) {
@@ -455,18 +481,6 @@ MovementLine.prototype.set_up = function() {
 		} else {
 			this.max_height = Math.max(child.find_intervening_height("all"), this.max_height);
 		}
-	}
-	
-	this.dest_x = this.head.x;
-	this.dest_y = this.head.max_height * vert_space;
-	this.bottom_y = (this.max_height + 1) * vert_space;
-	this.should_draw = 1;
-	return;
-}
-
-function set_up_movement() {
-	for (var i = 0; i < movement_lines.length; i++) {
-		movement_lines[i].set_up();
 	}
 }
 
