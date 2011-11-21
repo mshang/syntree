@@ -9,12 +9,14 @@
 		Mark the opening of constituents with an opening square bracket followed immediately by the category of the constituent. Leave a space between the category and anything to follow. If the category name ends with a capital P (e.g. NP, VP), the app will assume that it is a "phrase" node, so it will draw a triangle rather than a line to the content. This app will build the tree as you type and will attempt to close any brackets that you may be missing. You can save the image to your computer by right-clicking on it and selecting "Save image as".<br />
 		<h3>Examples:</h3>
 		<font face="monospace">[NP Alice]</font><br />
-		<img src="trees/alice.png" border="1" style="margin:5"/><br /><br />
+		<img src="images/alice.png" border="1" style="margin:5"/><br /><br />
 		<font face="monospace">[NP [N Alice] and [N Bob]]</font><br />
-		<img src="trees/alicebob.png" border="1" style="margin:5" /><br /><br />
+		<img src="images/aliceandbob.png" border="1" style="margin:5" /><br /><br />
 		<font face="monospace">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP of physics]]]]]</font><br />
-		<img src="trees/studentphysics.png" border="1" style="margin:5" /><br />
+		<img src="images/studentphysics.png" border="1" style="margin:5" /><br />
 		<h3>Movement Lines:</h3>
-		To show movement, mark the head of the movement with an underscore followed by a label, and the tail with the label between angled brackets. Any kind of constituent can be a head, but only leaves can be tails. The head constituent can not be the parent of the tail.<br />
+		To show movement, mark the head of the movement with an underscore followed by a label, and the tail with the label between angled brackets. Any kind of constituent can be a head, but only leaves can be tails. The head constituent can not be the parent of the tail. Labels can only be strings of letters and numbers with no spaces.<br /><br />
+		<font face="monospace">[CP [NP What]_a [C' [C did]_b [IP [NP you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;a&gt;]]]]]]</font><br />
+		<img src="images/movement.png" border="1" style="margin:5"/><br /><br />
 	</body>
 </html>
