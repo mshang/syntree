@@ -41,6 +41,7 @@ function Node() {
 	this.y = null;
 	this.head_chain = null;
 	this.tail_chain = null;
+	this.starred = null;
 }
 
 Node.prototype.set_siblings = function(parent) {
@@ -110,7 +111,7 @@ function go() {
 	str = close_brackets(str);
 	root = parse(str);
 	root.set_siblings(null);
-	root.check_phrase();
+	root.check_triangle();
 
 	// Find out dimensions of the tree.
 	root.set_width();
@@ -211,7 +212,13 @@ function parse(str) {
 	var i = 1;
 	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]"))
 		i++;
-	n.value = str.substr(1, i-1);
+	if (str[i-1] == "*") {
+		n.starred = 1;
+		n.value = str.substr(1, i-2);
+	} else {
+		n.starred = 0;
+		n.value = str.substr(1, i-1);
+	}
 	while (str[i] == " ")
 		i++;
 	if (str[i] != "]") {
@@ -246,21 +253,18 @@ function parse(str) {
 
 
 
-Node.prototype.check_phrase = function() {
+Node.prototype.check_triangle = function() {
 	this.draw_triangle = 0;
 
 	if ((this.type == "element") &&
 		(this.children.length == 1) &&
 		(this.first.type == "text") &&
-		(this.value[this.value.length-1] == "P") &&
-		(this.value.length > 1) &&
-		(this.first.value != "tr") &&
-		(this.first.value != "t")) {
+		(this.starred)) {
 			this.draw_triangle = 1;
 	}
 
 	for (var child = this.first; child != null; child = child.next) {
-		child.check_phrase();
+		child.check_triangle();
 	}
 }
 
