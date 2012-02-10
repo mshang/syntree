@@ -519,6 +519,10 @@ Node.prototype.find_intervening_height = function(direction) {
 		}
 	}
 	
+	if (child == null) {
+		return this.max_height;
+	}
+	
 	while (child != null) {
 		if (direction == "right")
 			child = child.next;
