@@ -101,7 +101,11 @@ function go() {
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
 	// We need to set font options so that measureText works properly.
-	ctx = document.getElementById('canvas').getContext('2d');
+	try {
+		ctx = document.getElementById('canvas').getContext('2d');
+	} catch (err) {
+		alert("Sorry, your browser is too outdated.");
+	}
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
 	
