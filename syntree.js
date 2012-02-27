@@ -1,4 +1,4 @@
-
+﻿
 /* TODO:
  * Quotation marks to ignore special characters.
  * Should use a real parser / lexer, maybe regex
@@ -199,6 +199,25 @@ function get_label(n, str) {
 	return str;
 }
 
+function subscriptify(in_str) {
+	var out_str = "";
+	for (var i = 0; i < in_str.length; ++i) {
+		switch (in_str[i]) {
+		case "0": out_str = out_str + "₀"; break;
+		case "1": out_str = out_str + "₁"; break;
+		case "2": out_str = out_str + "₂"; break;
+		case "3": out_str = out_str + "₃"; break;
+		case "4": out_str = out_str + "₄"; break;
+		case "5": out_str = out_str + "₅"; break;
+		case "6": out_str = out_str + "₆"; break;
+		case "7": out_str = out_str + "₇"; break;
+		case "8": out_str = out_str + "₈"; break;
+		case "9": out_str = out_str + "₉"; break;
+		}
+	}
+	return out_str;
+}
+
 function parse(str) {
 	var n = new Node();
 	
@@ -223,6 +242,9 @@ function parse(str) {
 		n.starred = 0;
 		n.value = str.substr(1, i-1);
 	}
+	if (n.label)
+		if (n.label.search(/^\d+$/) != -1)
+			n.value = n.value + subscriptify(n.label);
 	while (str[i] == " ")
 		i++;
 	if (str[i] != "]") {
