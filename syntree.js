@@ -3,7 +3,6 @@
  * Quotation marks to ignore special characters.
  * Deal with empty text nodes due to <> tags. Deal with this in lexer.
  * Basic antialiasing for vertical and horizontal lines
- * Strip initial spaces
  * Option to remove leaf lines
  * 
  */
@@ -382,6 +381,7 @@ function go() {
 }
 
 function close_brackets(str) { // And strip initial spaces
+	str = str.replace(/^\s+/, "");
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
 		if (str[i] == "[") open++;
