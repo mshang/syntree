@@ -2,8 +2,8 @@
 /* TODO:
  * Quotation marks to ignore special characters.
  * Deal with empty text nodes due to <> tags. Deal with this in lexer.
- * Basic antialiasing for vertical and horizontal lines
  * Option to remove leaf lines
+ * Remove jQuery
  * 
  */
 
@@ -128,8 +128,9 @@ Node.prototype.find_height = function() {
 }
 
 Node.prototype.assign_location = function(x, y) {
-	this.x = x;
-	this.y = y;
+	// floor + 0.5 for antialiasing
+	this.x = Math.floor(x) + 0.5;
+	this.y = Math.floor(y) + 0.5;
 	
 	if (this.type == "element") {
 		var left_start = x - (this.step)*((this.children.length-1)/2);
@@ -506,8 +507,8 @@ function set_up_canvas() {
 	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.textAlign = "center";
 	ctx.font = font_size + "pt " + font_style;
-	var x_shift = root.left_width + padding;
-	var y_shift = font_size + padding;
+	var x_shift = Math.floor(root.left_width + padding);
+	var y_shift = Math.floor(font_size + padding);
 	ctx.translate(x_shift, y_shift);
 }
 
