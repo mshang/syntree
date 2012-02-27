@@ -1,9 +1,8 @@
 ﻿
 /* TODO:
  * Quotation marks to ignore special characters.
- * Should use a real parser / lexer, maybe regex
  * Deal with empty text nodes due to <> tags. Deal with this in lexer.
- * Add control points for movement lines below corners of lowest hanging intervening nodes.
+ * Basic antialiasing for vertical lines
  * 
  */
 
@@ -45,9 +44,8 @@ function Node() {
 }
 
 Node.prototype.set_siblings = function(parent) {
-	for (var i = 0; i < this.children.length; i++) {
+	for (var i = 0; i < this.children.length; i++)
 		this.children[i].set_siblings(this);
-	}
 	
 	this.has_children = (this.children.length > 0);
 	this.parent = parent;
@@ -57,13 +55,11 @@ Node.prototype.set_siblings = function(parent) {
 		this.last = this.children[this.children.length - 1];
 	}
 	
-	for (var i = 0; i < this.children.length - 1; i++) {
+	for (var i = 0; i < this.children.length - 1; i++)
 		this.children[i].next = this.children[i+1];
-	}
 	
-	for (var i = 1; i < this.children.length; i++) {
+	for (var i = 1; i < this.children.length; i++)
 		this.children[i].previous = this.children[i-1];
-	}
 }
 
 function MovementLine() {
@@ -95,9 +91,8 @@ function go() {
 	vert_space = parseInt(document.f.vertspace.value);
 	hor_space = parseInt(document.f.horspace.value);
 	font_size = parseInt(document.f.fontsize.value);
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < 3; i++)
 		if (document.f.fontstyle[i].checked) font_style = document.f.fontstyle[i].value;
-	}
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
 	// We need to set font options so that measureText works properly.
@@ -165,13 +160,10 @@ function swap_out_image() {
 function close_brackets(str) {
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
-		if (str[i] == "[")
-			open++;
-		if (str[i] == "]")
-			open--;
+		if (str[i] == "[") open++;
+		if (str[i] == "]") open--;
 	}
-	if (open < 0)
-		throw "Too many open brackets.";
+	if (open < 0) throw "Too many open brackets.";
 	while (open > 0) {
 		str = str + "]";
 		open--;
@@ -183,19 +175,19 @@ function get_tail(n, str) {
 	// Get any movement information.
 	// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
 	str = str.replace(/\s*<(\w+)>\s*/, 
-	function(match, tail) {
-		n.tail = tail;
-		return " ";
-	});
+		function(match, tail) {
+			n.tail = tail;
+			return " ";
+		});
 	return str;
 }
 
 function get_label(n, str) {
 	str = str.replace(/_(\w+)$/, 
-	function(match, label) {
-		n.label = label;
-		return "";
-	});
+		function(match, label) {
+			n.label = label;
+			return "";
+		});
 	return str;
 }
 
@@ -233,8 +225,7 @@ function parse(str) {
 	n.type = "element";
 	str = get_label(n, str);
 	var i = 1;
-	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]"))
-		i++;
+	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]")) i++;
 	if (str[i-1] == "*") {
 		n.starred = 1;
 		n.value = str.substr(1, i-2);
@@ -245,21 +236,17 @@ function parse(str) {
 	if (n.label)
 		if (n.label.search(/^\d+$/) != -1)
 			n.value = n.value + subscriptify(n.label);
-	while (str[i] == " ")
-		i++;
+	while (str[i] == " ") i++;
 	if (str[i] != "]") {
 		var level = 1;
 		var start = i;
 		for (; i < str.length; i++) {
 			var temp = level;
-			if (str[i] == "[")
-				level++;
-			if (str[i] == "]")
-				level--;
+			if (str[i] == "[") level++;
+			if (str[i] == "]") level--;
 			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
-				if (str.substring(start, i).search(/\w/) > -1) {
+				if (str.substring(start, i).search(/\w/) > -1)
 					n.children.push(parse(str.substring(start, i)));
-				}
 				start = i;
 			}
 			if ((temp == 2) && (level == 1)) {
@@ -285,13 +272,11 @@ Node.prototype.check_triangle = function() {
 	if ((this.type == "element") &&
 		(this.children.length == 1) &&
 		(this.first.type == "text") &&
-		(this.starred)) {
+		(this.starred))
 			this.draw_triangle = 1;
-	}
 
-	for (var child = this.first; child != null; child = child.next) {
+	for (var child = this.first; child != null; child = child.next)
 		child.check_triangle();
-	}
 }
 
 Node.prototype.set_width = function() {
@@ -355,9 +340,8 @@ Node.prototype.assign_location = function(x, y) {
 	if (this.type == "element") {
 		var left_start = x - (this.step)*((this.children.length-1)/2);
 		
-		for (var i = 0; i < this.children.length; i++) {
+		for (var i = 0; i < this.children.length; i++)
 			this.children[i].assign_location(left_start + i*(this.step), y + vert_space);
-		}
 	}
 }
 
@@ -403,11 +387,9 @@ MovementLine.prototype.draw = function() {
 }
 
 function draw_movement() {
-	for (var i = 0; i < movement_lines.length; i++) {
-		if (movement_lines[i].should_draw) {
+	for (var i = 0; i < movement_lines.length; i++)
+		if (movement_lines[i].should_draw)
 			movement_lines[i].draw();
-		}
-	}
 }
 
 Node.prototype.find_head = function(label) {
@@ -417,17 +399,15 @@ Node.prototype.find_head = function(label) {
 			return res;
 	}
 	
-	if (this.label == label) {
-		return this;
-	}
+	if (this.label == label) return this;
 	return null;
 }
 
 Node.prototype.find_movement = function() {
-	if (this.type == "element") {
+	if (this.type == "element")
 		for (var child = this.first; child != null; child = child.next)
 			child.find_movement();
-	}
+	
 	if (this.tail != null) {
 		var m = new MovementLine;
 		m.tail = this;
@@ -453,17 +433,14 @@ function set_up_movement() {
 
 MovementLine.prototype.set_up = function() {
 	this.should_draw = 0;
-	if ((this.tail == null) || (this.head == null))
-		return;
+	if ((this.tail == null) || (this.head == null)) return;
 	
 	// Check to see if head is parent of tail,
-	if (!this.check_head())
-		return;
+	if (!this.check_head()) return;
 	
 	// Find the last common ancestor.
 	this.find_lca();
-	if (this.lca == null)
-		return;
+	if (this.lca == null) return;
 	
 	// Find out the greatest intervening height.
 	this.find_intervening_height();
@@ -480,8 +457,7 @@ MovementLine.prototype.check_head = function() {
 	n.tail_chain = 1;
 	while (n.parent != null) {
 		n = n.parent;
-		if (n == this.head)
-			return 0;
+		if (n == this.head) return 0;
 		n.tail_chain = 1;
 	}
 	return 1;
@@ -527,9 +503,7 @@ Node.prototype.find_intervening_height = function(direction) {
 	var length = this.children.length;
 	var max_height = this.height;
 	
-	if (!this.has_children) {
-		return this.height;
-	}
+	if (!this.has_children) return this.height;
 	
 	if (direction == "all") {
 		for (var child = this.first; child != null; child = child.next)
@@ -550,10 +524,8 @@ Node.prototype.find_intervening_height = function(direction) {
 	}
 	
 	while (child != null) {
-		if (direction == "right")
-			child = child.next;
-		if (direction == "left")
-			child = child.previous;
+		if (direction == "right") child = child.next;
+		if (direction == "left") child = child.previous;
 		if (child != null)
 			max_height = Math.max(child.find_intervening_height("all"), max_height);
 	}
