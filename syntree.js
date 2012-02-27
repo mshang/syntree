@@ -2,7 +2,9 @@
 /* TODO:
  * Quotation marks to ignore special characters.
  * Deal with empty text nodes due to <> tags. Deal with this in lexer.
- * Basic antialiasing for vertical lines
+ * Basic antialiasing for vertical and horizontal lines
+ * Strip initial spaces
+ * Option to remove leaf lines
  * 
  */
 
@@ -62,210 +64,6 @@ Node.prototype.set_siblings = function(parent) {
 		this.children[i].previous = this.children[i-1];
 }
 
-function MovementLine() {
-	this.head = null;
-	this.tail = null;
-	this.lca = null;
-	this.dest_x = null;
-	this.dest_y = null;
-	this.bottom_y = null;
-	this.max_height = null;
-	this.should_draw = null;
-}
-
-
-
-function handler() {
-	if (debug) {
-		go();
-	} else {
-		try {
-			go();
-		} catch (err) {	}
-	}
-}
-
-function go() {
-
-	// Initialize the various options.
-	vert_space = parseInt(document.f.vertspace.value);
-	hor_space = parseInt(document.f.horspace.value);
-	font_size = parseInt(document.f.fontsize.value);
-	for (var i = 0; i < 3; i++)
-		if (document.f.fontstyle[i].checked) font_style = document.f.fontstyle[i].value;
-	
-	// Initialize the canvas. TODO: make this degrade gracefully.
-	// We need to set font options so that measureText works properly.
-	try {
-		ctx = document.getElementById('canvas').getContext('2d');
-	} catch (err) {
-		alert("Sorry, your browser is too outdated.");
-	}
-	ctx.textAlign = "center";
-	ctx.font = font_size + "pt " + font_style;
-	
-	// Get the string and parse it.
-	var str = document.f.i.value;
-
-	str = close_brackets(str);
-	root = parse(str);
-	root.set_siblings(null);
-	root.check_triangle();
-
-	// Find out dimensions of the tree.
-	root.set_width();
-	root.find_height();
-	root.assign_location(0, 0);
-	movement_lines = new Array();
-	root.find_movement();
-	set_up_movement();
-	set_up_canvas();
-	root.draw();
-	draw_movement();
-	swap_out_image();
-	//alert(JSON.stringify(root));
-}
-
-function set_up_canvas() {
-	var width = root.left_width + root.right_width + 2 * padding;
-	var height = set_window_height();
-	// Make a new canvas. Required for IE compatability.
-	var canvas = document.createElement("canvas");
-	canvas.id = "canvas";
-	canvas.width = width;
-	canvas.height = height;
-	ctx.canvas.parentNode.replaceChild(canvas, ctx.canvas);
-	ctx = canvas.getContext('2d');
-	ctx.fillStyle = "rgb(255, 255, 255)";
-	ctx.fillRect(0, 0, width, height);
-	ctx.fillStyle = "rgb(0, 0, 0)";
-	ctx.textAlign = "center";
-	ctx.font = font_size + "pt " + font_style;
-	var x_shift = root.left_width + padding;
-	var y_shift = font_size + padding;
-	ctx.translate(x_shift, y_shift);
-}
-
-function swap_out_image() {
-	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
-	new_img.id = "treeimg";
-	new_img.border = "1";
-	var old_img = document.getElementById('treeimg');
-	old_img.parentNode.replaceChild(new_img, old_img);
-	ctx.canvas.style.display = "none";
-}
-
-
-
-function close_brackets(str) {
-	var open = 0;
-	for (var i = 0; i < str.length; i++) {
-		if (str[i] == "[") open++;
-		if (str[i] == "]") open--;
-	}
-	if (open < 0) throw "Too many open brackets.";
-	while (open > 0) {
-		str = str + "]";
-		open--;
-	}
-	return str;
-}
-
-function get_tail(n, str) {
-	// Get any movement information.
-	// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
-	str = str.replace(/\s*<(\w+)>\s*/, 
-		function(match, tail) {
-			n.tail = tail;
-			return " ";
-		});
-	return str;
-}
-
-function get_label(n, str) {
-	str = str.replace(/_(\w+)$/, 
-		function(match, label) {
-			n.label = label;
-			return "";
-		});
-	return str;
-}
-
-function subscriptify(in_str) {
-	var out_str = "";
-	for (var i = 0; i < in_str.length; ++i) {
-		switch (in_str[i]) {
-		case "0": out_str = out_str + "₀"; break;
-		case "1": out_str = out_str + "₁"; break;
-		case "2": out_str = out_str + "₂"; break;
-		case "3": out_str = out_str + "₃"; break;
-		case "4": out_str = out_str + "₄"; break;
-		case "5": out_str = out_str + "₅"; break;
-		case "6": out_str = out_str + "₆"; break;
-		case "7": out_str = out_str + "₇"; break;
-		case "8": out_str = out_str + "₈"; break;
-		case "9": out_str = out_str + "₉"; break;
-		}
-	}
-	return out_str;
-}
-
-function parse(str) {
-	var n = new Node();
-	
-	if (str[0] != "[") { // Text node
-		n.type = "text";
-		str = get_tail(n, str);
-		str = str.replace(/^\s+/, "");
-		str = str.replace(/\s+$/, "");
-		n.value = str;
-		return n;
-	}
-
-	n.type = "element";
-	str = get_label(n, str);
-	var i = 1;
-	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]")) i++;
-	if (str[i-1] == "*") {
-		n.starred = 1;
-		n.value = str.substr(1, i-2);
-	} else {
-		n.starred = 0;
-		n.value = str.substr(1, i-1);
-	}
-	if (n.label)
-		if (n.label.search(/^\d+$/) != -1)
-			n.value = n.value + subscriptify(n.label);
-	while (str[i] == " ") i++;
-	if (str[i] != "]") {
-		var level = 1;
-		var start = i;
-		for (; i < str.length; i++) {
-			var temp = level;
-			if (str[i] == "[") level++;
-			if (str[i] == "]") level--;
-			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
-				if (str.substring(start, i).search(/\w/) > -1)
-					n.children.push(parse(str.substring(start, i)));
-				start = i;
-			}
-			if ((temp == 2) && (level == 1)) {
-				if (str[i+1] == "_") { // Must include label.
-					i += 2;
-					while (str[i].search(/\w/) > -1)
-						i++;
-					i--;
-				}
-				n.children.push(parse(str.substring(start, i+1)));
-				start = i+1;
-			}
-		}
-	}
-	return n;
-}
-
-
-
 Node.prototype.check_triangle = function() {
 	this.draw_triangle = 0;
 
@@ -322,16 +120,13 @@ Node.prototype.find_height = function() {
 	}
 	
 	this.max_height = 0;
-	if (!this.has_children)
-		this.max_height = this.height;
+	if (!this.has_children) this.max_height = this.height;
 	
 	for (var child = this.first; child != null; child = child.next) {
 		child.find_height();
 		this.max_height = Math.max(this.max_height, child.max_height);
 	}
 }
-
-
 
 Node.prototype.assign_location = function(x, y) {
 	this.x = x;
@@ -371,32 +166,10 @@ Node.prototype.draw = function() {
 	}
 }
 
-MovementLine.prototype.draw = function() {
-	ctx.moveTo(this.tail.x, this.tail.y + space_below_text);
-	ctx.quadraticCurveTo(this.tail.x, this.bottom_y, (this.tail.x + this.dest_x) / 2, this.bottom_y);
-	ctx.quadraticCurveTo(this.dest_x, this.bottom_y, this.dest_x, this.dest_y + space_below_text);
-	ctx.stroke();
-	// Arrowhead
-	ctx.beginPath();
-	ctx.lineTo(this.dest_x + 3, this.dest_y + space_below_text + 10);
-	ctx.lineTo(this.dest_x - 3, this.dest_y + space_below_text + 10);
-	ctx.lineTo(this.dest_x, this.dest_y + space_below_text);
-	ctx.closePath();
-	ctx.fillStyle = "#000000";
-	ctx.fill();
-}
-
-function draw_movement() {
-	for (var i = 0; i < movement_lines.length; i++)
-		if (movement_lines[i].should_draw)
-			movement_lines[i].draw();
-}
-
 Node.prototype.find_head = function(label) {
 	for (var child = this.first; child != null; child = child.next) {
 		var res = child.find_head(label);
-		if (res != null)
-			return res;
+		if (res != null) return res;
 	}
 	
 	if (this.label == label) return this;
@@ -424,11 +197,47 @@ Node.prototype.reset_chains = function() {
 		child.reset_chains();
 }
 
-function set_up_movement() {
-	for (var i = 0; i < movement_lines.length; i++) {
-		root.reset_chains();
-		movement_lines[i].set_up();
+Node.prototype.find_intervening_height = function(direction) {
+	var length = this.children.length;
+	var max_height = this.height;
+	
+	if (!this.has_children) return this.height;
+	
+	if (direction == "all") {
+		for (var child = this.first; child != null; child = child.next)
+			max_height = Math.max(child.find_intervening_height("all"), max_height);
+		return max_height;
 	}
+	
+	var child = this.first;
+	for (; child != null; child = child.next) {
+		if ((child.head_chain) || (child.tail_chain)) {
+			max_height = Math.max(child.find_intervening_height(direction), max_height);
+			break;
+		}
+	}
+	
+	if (child == null) return this.max_height;
+	
+	while (child != null) {
+		if (direction == "right") child = child.next;
+		if (direction == "left") child = child.previous;
+		if (child != null)
+			max_height = Math.max(child.find_intervening_height("all"), max_height);
+	}
+	
+	return max_height;
+}
+
+function MovementLine() {
+	this.head = null;
+	this.tail = null;
+	this.lca = null;
+	this.dest_x = null;
+	this.dest_y = null;
+	this.bottom_y = null;
+	this.max_height = null;
+	this.should_draw = null;
 }
 
 MovementLine.prototype.set_up = function() {
@@ -499,38 +308,216 @@ MovementLine.prototype.find_intervening_height = function() {
 	}
 }
 
-Node.prototype.find_intervening_height = function(direction) {
-	var length = this.children.length;
-	var max_height = this.height;
+MovementLine.prototype.draw = function() {
+	ctx.moveTo(this.tail.x, this.tail.y + space_below_text);
+	ctx.quadraticCurveTo(this.tail.x, this.bottom_y, (this.tail.x + this.dest_x) / 2, this.bottom_y);
+	ctx.quadraticCurveTo(this.dest_x, this.bottom_y, this.dest_x, this.dest_y + space_below_text);
+	ctx.stroke();
+	// Arrowhead
+	ctx.beginPath();
+	ctx.lineTo(this.dest_x + 3, this.dest_y + space_below_text + 10);
+	ctx.lineTo(this.dest_x - 3, this.dest_y + space_below_text + 10);
+	ctx.lineTo(this.dest_x, this.dest_y + space_below_text);
+	ctx.closePath();
+	ctx.fillStyle = "#000000";
+	ctx.fill();
+}
+
+function handler() {
+	if (debug) {
+		go();
+	} else {
+		try {
+			go();
+		} catch (err) {	}
+	}
+}
+
+function go() {
+
+	// Initialize the various options.
+	vert_space = parseInt(document.f.vertspace.value);
+	hor_space = parseInt(document.f.horspace.value);
+	font_size = parseInt(document.f.fontsize.value);
+	for (var i = 0; i < 3; i++)
+		if (document.f.fontstyle[i].checked)
+			font_style = document.f.fontstyle[i].value;
 	
-	if (!this.has_children) return this.height;
+	// Initialize the canvas. TODO: make this degrade gracefully.
+	// We need to set font options so that measureText works properly.
+	try {
+		ctx = document.getElementById('canvas').getContext('2d');
+	} catch (err) {
+		alert("Sorry, your browser is too outdated.");
+	}
+	ctx.textAlign = "center";
+	ctx.font = font_size + "pt " + font_style;
 	
-	if (direction == "all") {
-		for (var child = this.first; child != null; child = child.next)
-			max_height = Math.max(child.find_intervening_height("all"), max_height);
-		return max_height;
+	// Get the string and parse it.
+	var str = document.f.i.value;
+
+	str = close_brackets(str);
+	root = parse(str);
+	root.set_siblings(null);
+	root.check_triangle();
+
+	// Find out dimensions of the tree.
+	root.set_width();
+	root.find_height();
+	root.assign_location(0, 0);
+	
+	movement_lines = new Array();
+	root.find_movement();
+	for (var i = 0; i < movement_lines.length; i++) {
+		root.reset_chains();
+		movement_lines[i].set_up();
 	}
 	
-	var child = this.first;
-	for (; child != null; child = child.next) {
-		if ((child.head_chain) || (child.tail_chain)) {
-			max_height = Math.max(child.find_intervening_height(direction), max_height);
-			break;
+	set_up_canvas();
+	root.draw();
+	for (var i = 0; i < movement_lines.length; i++)
+		if (movement_lines[i].should_draw) movement_lines[i].draw();
+	swap_out_image();
+	//alert(JSON.stringify(root));
+}
+
+function close_brackets(str) { // And strip initial spaces
+	var open = 0;
+	for (var i = 0; i < str.length; i++) {
+		if (str[i] == "[") open++;
+		if (str[i] == "]") open--;
+	}
+	if (open < 0) throw "Too many open brackets.";
+	while (open > 0) {
+		str = str + "]";
+		open--;
+	}
+	return str;
+}
+
+function subscriptify(in_str) {
+	var out_str = "";
+	for (var i = 0; i < in_str.length; ++i) {
+		switch (in_str[i]) {
+		case "0": out_str = out_str + "₀"; break;
+		case "1": out_str = out_str + "₁"; break;
+		case "2": out_str = out_str + "₂"; break;
+		case "3": out_str = out_str + "₃"; break;
+		case "4": out_str = out_str + "₄"; break;
+		case "5": out_str = out_str + "₅"; break;
+		case "6": out_str = out_str + "₆"; break;
+		case "7": out_str = out_str + "₇"; break;
+		case "8": out_str = out_str + "₈"; break;
+		case "9": out_str = out_str + "₉"; break;
 		}
 	}
+	return out_str;
+}
+
+function get_tail(n, str) {
+	// Get any movement information.
+	// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
+	str = str.replace(/\s*<(\w+)>\s*/, 
+		function(match, tail) {
+			n.tail = tail;
+			return " ";
+		});
+	return str;
+}
+
+function get_label(n, str) {
+	str = str.replace(/_(\w+)$/, 
+		function(match, label) {
+			n.label = label;
+			return "";
+		});
+	return str;
+}
+
+function parse(str) {
+	var n = new Node();
 	
-	if (child == null) {
-		return this.max_height;
+	if (str[0] != "[") { // Text node
+		n.type = "text";
+		str = get_tail(n, str);
+		str = str.replace(/^\s+/, "");
+		str = str.replace(/\s+$/, "");
+		n.value = str;
+		return n;
+	}
+
+	n.type = "element";
+	str = get_label(n, str);
+	var i = 1;
+	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]")) i++;
+	
+	if (str[i-1] == "*") {
+		n.starred = 1;
+		n.value = str.substr(1, i-2);
+	} else {
+		n.starred = 0;
+		n.value = str.substr(1, i-1);
 	}
 	
-	while (child != null) {
-		if (direction == "right") child = child.next;
-		if (direction == "left") child = child.previous;
-		if (child != null)
-			max_height = Math.max(child.find_intervening_height("all"), max_height);
-	}
+	if (n.label)
+		if (n.label.search(/^\d+$/) != -1)
+			n.value = n.value + subscriptify(n.label);
 	
-	return max_height;
+	while (str[i] == " ") i++;
+	if (str[i] != "]") {
+		var level = 1;
+		var start = i;
+		for (; i < str.length; i++) {
+			var temp = level;
+			if (str[i] == "[") level++;
+			if (str[i] == "]") level--;
+			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
+				if (str.substring(start, i).search(/\w/) > -1)
+					n.children.push(parse(str.substring(start, i)));
+				start = i;
+			}
+			if ((temp == 2) && (level == 1)) {
+				if (str[i+1] == "_") { // Must include label.
+					i += 2;
+					while (str[i].search(/\w/) > -1)
+						i++;
+					i--;
+				}
+				n.children.push(parse(str.substring(start, i+1)));
+				start = i+1;
+			}
+		}
+	}
+	return n;
+}
+
+function set_up_canvas() {
+	var width = root.left_width + root.right_width + 2 * padding;
+	var height = set_window_height();
+	// Make a new canvas. Required for IE compatability.
+	var canvas = document.createElement("canvas");
+	canvas.id = "canvas";
+	canvas.width = width;
+	canvas.height = height;
+	ctx.canvas.parentNode.replaceChild(canvas, ctx.canvas);
+	ctx = canvas.getContext('2d');
+	ctx.fillStyle = "rgb(255, 255, 255)";
+	ctx.fillRect(0, 0, width, height);
+	ctx.fillStyle = "rgb(0, 0, 0)";
+	ctx.textAlign = "center";
+	ctx.font = font_size + "pt " + font_style;
+	var x_shift = root.left_width + padding;
+	var y_shift = font_size + padding;
+	ctx.translate(x_shift, y_shift);
+}
+
+function swap_out_image() {
+	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
+	new_img.id = "treeimg";
+	new_img.border = "1";
+	var old_img = document.getElementById('treeimg');
+	old_img.parentNode.replaceChild(new_img, old_img);
+	ctx.canvas.style.display = "none";
 }
 
 function set_window_height() {
