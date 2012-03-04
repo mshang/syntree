@@ -7,6 +7,8 @@
  * Colors
  * Change movement line notation.
  * Limit how shallow movment lines can be.
+ * Make linkable
+ * Offset arrows
  * 
  */
 

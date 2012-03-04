@@ -1,94 +1,94 @@
 <html>
-	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=9" >
-		<title>Syntax Tree Generator</title>
-		<style type="text/css">
-		canvas { border: 1px solid ; background: white; display: none }
-		</style>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=9" >
+	<title>Syntax Tree Generator</title>
+	<style type="text/css">
+	canvas { border: 1px solid ; background: white; display: none }
+	</style>
+</head>
+<body style="background-color:AntiqueWhite"><center>
+	<table border="0">
+		<tr><th colspan="5" style="font-size:24px">Syntax Tree Generator</th></tr>
+		<tr>
+			<td><a href="help.html">Help</a></td>
+			<td><a href="LICENSE.txt">License</a></td>
+			<td colspan="3">Please send suggestions to <a href="mailto:mail@mshang.ca">mail@mshang.ca</a></td>
+		</tr>
+		<form name="f">
+			<tr><th colspan="5"><textarea name="i" rows="3" cols="50" style="width:100%">[S [NP Miles] [VP [V ate] [NP* all the hot dogs]]]</textarea></th></tr>
+			<tr>
+				<td align="left" colspan="2">Font style:</td>
+				<td><input type="radio" name="fontstyle" value="serif" checked />Serif</td>
+				<td><input type="radio" name="fontstyle" value="sans-serif" />Sans-Serif</td>
+				<td><input type="radio" name="fontstyle" value="monospace" />Monospace</td>
+			</tr>
+			<tr>
+				<td align="left" colspan="2">Terminal font:</td>
+				<td><input type="checkbox" name="termbold" />Bold</td>
+				<td><input type="checkbox" name="termital" />Italic</td>
+				<td><input type="checkbox" name="termsc" />Small Caps</td>
+			</tr>
+			<tr>
+				<td align="left" colspan="2">Non-terminal font:</td>
+				<td><input type="checkbox" name="nontermbold" />Bold</td>
+				<td><input type="checkbox" name="nontermital" />Italic</td>
+				<td><input type="checkbox" name="nontermsc" />Small Caps</td>
+			</tr>
+			<tr>
+				<td align="left" colspan="2">Font size:</td>
+				<td align="right" colspan="3"><input type="range" name="fontsize" 
+					style="width:100%" min="8" max="16" value="12" step="2"></input></td>
+			</tr>
+			<tr>
+				<td align="left" colspan="2">Vertical spacing:</td>
+				<td align="right" colspan="3"><input type="range" name="vertspace" 
+					style="width:100%" min="30" max="100" value="40" step="5"></input></td>
+			</tr>
+			<tr>
+				<td align="left" colspan="2">Horizontal spacing:</td>
+				<td align="right" colspan="3"><input type="range" name="horspace" 
+					style="width:100%" min="10" max="50" value="10" step="5"></input></td>
+			</tr>
+		</form>
+	</table><br />
+	
+	<canvas id="canvas"></canvas>
+	<img id="treeimg" style="display:none"/>
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-25344866-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+	<script type="text/javascript" src="base64.js"></script>
+	<script type="text/javascript" src="canvas2image.js"></script>
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="syntree.js"></script>
+	<script type="text/javascript">
+	$(function() {
+		handler();
 		
-		<script type="text/javascript">
-			var _gaq = _gaq || [];
-			_gaq.push(['_setAccount', 'UA-25344866-1']);
-			_gaq.push(['_trackPageview']);
-
-			(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			})();
-		</script>
-
-		<script type="text/javascript" src="base64.js"></script>
-		<script type="text/javascript" src="canvas2image.js"></script>
-		<script type="text/javascript" src="jquery.js"></script>
-		<script type="text/javascript" src="syntree.js"></script>
-		<script type="text/javascript">
-		$(function() {
-			handler();
-			
-			$(document.f.i).keyup(handler);
-			$(document.f.i).change(handler);
-			$(document.f.fontsize).change(handler);
-			$(document.f.vertspace).change(handler);
-			$(document.f.horspace).change(handler);
-			$(document.f.fontstyle).change(handler);
-			$(document.f.termbold).change(handler);
-			$(document.f.termital).change(handler);
-			$(document.f.termsc).change(handler);
-			$(document.f.nontermbold).change(handler);
-			$(document.f.nontermital).change(handler);
-			$(document.f.nontermsc).change(handler);
-		});
-		</script>
-	</head>
-	<body style="background-color:AntiqueWhite">
-		<center>
-			<table border="0">
-				<tr><th colspan="5" style="font-size:24px">Syntax Tree Generator</th></tr>
-				<tr>
-					<td><a href="help.html">Help</a></td>
-					<td><a href="LICENSE.txt">License</a></td>
-					<td colspan="3">Please send suggestions to <a href="mailto:mail@mshang.ca">mail@mshang.ca</a></td>
-				</tr>
-				<form name="f">
-					<tr><th colspan="5"><textarea name="i" rows="3" cols="50" style="width:100%">[S [NP Miles] [VP [V ate] [NP* all the hot dogs]]]</textarea></th></tr>
-					<tr>
-						<td align="left" colspan="2">Font style:</td>
-						<td><input type="radio" name="fontstyle" value="serif" checked />Serif</td>
-						<td><input type="radio" name="fontstyle" value="sans-serif" />Sans-Serif</td>
-						<td><input type="radio" name="fontstyle" value="monospace" />Monospace</td>
-					</tr>
-					<tr>
-						<td align="left" colspan="2">Terminal font:</td>
-						<td><input type="checkbox" name="termbold" />Bold</td>
-						<td><input type="checkbox" name="termital" />Italic</td>
-						<td><input type="checkbox" name="termsc" />Small Caps</td>
-					</tr>
-					<tr>
-						<td align="left" colspan="2">Non-terminal font:</td>
-						<td><input type="checkbox" name="nontermbold" />Bold</td>
-						<td><input type="checkbox" name="nontermital" />Italic</td>
-						<td><input type="checkbox" name="nontermsc" />Small Caps</td>
-					</tr>
-					<tr>
-						<td align="left" colspan="2">Font size:</td>
-						<td align="right" colspan="3"><input type="range" name="fontsize" 
-							style="width:100%" min="8" max="16" value="12" step="2"></input></td>
-					</tr>
-					<tr>
-						<td align="left" colspan="2">Vertical spacing:</td>
-						<td align="right" colspan="3"><input type="range" name="vertspace" 
-							style="width:100%" min="30" max="100" value="40" step="5"></input></td>
-					</tr>
-					<tr>
-						<td align="left" colspan="2">Horizontal spacing:</td>
-						<td align="right" colspan="3"><input type="range" name="horspace" 
-							style="width:100%" min="10" max="50" value="10" step="5"></input></td>
-					</tr>
-				</form>
-			</table><br />
-			<canvas id="canvas"></canvas>
-			<img id="treeimg" style="display:none"/>
-		</center>
-	</body>
+		$(document.f.i).keyup(handler);
+		$(document.f.i).change(handler);
+		$(document.f.fontsize).change(handler);
+		$(document.f.vertspace).change(handler);
+		$(document.f.horspace).change(handler);
+		$(document.f.fontstyle).change(handler);
+		$(document.f.termbold).change(handler);
+		$(document.f.termital).change(handler);
+		$(document.f.termsc).change(handler);
+		$(document.f.nontermbold).change(handler);
+		$(document.f.nontermital).change(handler);
+		$(document.f.nontermsc).change(handler);
+	});
+	</script>
+	
+</center></body>
 </html>
