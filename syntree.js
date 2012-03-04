@@ -4,6 +4,9 @@
  * Deal with empty text nodes due to <> tags. Deal with this in lexer.
  * Option to remove leaf lines
  * Remove jQuery
+ * Colors
+ * Change movement line notation.
+ * Limit how shallow movment lines can be.
  * 
  */
 
@@ -14,10 +17,10 @@ var space_below_text = 4;
 var vert_space;
 var hor_space;
 var font_size;
-var font_style;
+var term_font;
+var nonterm_font;
 var ctx;
 var root;
-var movement_lines = new Array();
 
 
 
@@ -77,6 +80,9 @@ Node.prototype.check_triangle = function() {
 }
 
 Node.prototype.set_width = function() {
+	ctx.font = term_font;
+	if (this.has_children)
+		ctx.font = nonterm_font;
 
 	var val_width = ctx.measureText(this.value).width;
 
@@ -141,15 +147,11 @@ Node.prototype.assign_location = function(x, y) {
 }
 
 Node.prototype.draw = function() {
-	
-	if (this.type == "text") {
-		ctx.fillText(this.value, this.x, this.y);
-		return;
-	}
+	ctx.font = term_font;
+	if (this.has_children)
+		ctx.font = nonterm_font;
 	
 	ctx.fillText(this.value, this.x, this.y);
-	for (var child = this.first; child != null; child = child.next)
-		child.draw();
 	
 	if (this.draw_triangle) {
 		ctx.moveTo(this.x, this.y + space_below_text);
@@ -164,6 +166,9 @@ Node.prototype.draw = function() {
 			ctx.stroke();
 		}
 	}
+	
+	for (var child = this.first; child != null; child = child.next)
+		child.draw();
 }
 
 Node.prototype.find_head = function(label) {
@@ -176,16 +181,16 @@ Node.prototype.find_head = function(label) {
 	return null;
 }
 
-Node.prototype.find_movement = function() {
+Node.prototype.find_movement = function(mlarr) {
 	if (this.type == "element")
 		for (var child = this.first; child != null; child = child.next)
-			child.find_movement();
+			child.find_movement(mlarr);
 	
 	if (this.tail != null) {
 		var m = new MovementLine;
 		m.tail = this;
 		m.head = root.find_head(this.tail);
-		movement_lines.push(m);
+		mlarr.push(m);
 	}
 }
 
@@ -334,14 +339,6 @@ function handler() {
 }
 
 function go() {
-
-	// Initialize the various options.
-	vert_space = parseInt(document.f.vertspace.value);
-	hor_space = parseInt(document.f.horspace.value);
-	font_size = parseInt(document.f.fontsize.value);
-	for (var i = 0; i < 3; i++)
-		if (document.f.fontstyle[i].checked)
-			font_style = document.f.fontstyle[i].value;
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
 	// We need to set font options so that measureText works properly.
@@ -350,38 +347,37 @@ function go() {
 	} catch (err) {
 		alert("Sorry, your browser is too outdated.");
 	}
-	ctx.textAlign = "center";
-	ctx.font = font_size + "pt " + font_style;
 	
-	// Get the string and parse it.
+	// Initialize the various options.
+	term_font = "";
+	nonterm_font = "";
+	if (document.f.termital.checked == true)
+		term_font = term_font + "italic ";
+	if (document.f.termsc.checked == true)
+		term_font = term_font + "small-caps ";
+	if (document.f.termbold.checked == true)
+		term_font = term_font + "bold ";
+	if (document.f.nontermital.checked == true)
+		nonterm_font = nonterm_font + "italic ";
+	if (document.f.nontermsc.checked == true)
+		nonterm_font = nonterm_font + "small-caps ";
+	if (document.f.nontermbold.checked == true)
+		nonterm_font = nonterm_font + "bold ";
+	font_size = parseInt(document.f.fontsize.value);
+	term_font = term_font + font_size + "pt ";
+	nonterm_font = nonterm_font + font_size + "pt ";
+	for (var i = 0; i < 3; i++)
+		if (document.f.fontstyle[i].checked) {
+			term_font = term_font + document.f.fontstyle[i].value;
+			nonterm_font = nonterm_font + document.f.fontstyle[i].value;
+		}
+	vert_space = parseInt(document.f.vertspace.value);
+	hor_space = parseInt(document.f.horspace.value);
+	
+	// Get the string.
 	var str = document.f.i.value;
 
-	str = close_brackets(str);
-	root = parse(str);
-	root.set_siblings(null);
-	root.check_triangle();
-
-	// Find out dimensions of the tree.
-	root.set_width();
-	root.find_height();
-	root.assign_location(0, 0);
-	
-	movement_lines = new Array();
-	root.find_movement();
-	for (var i = 0; i < movement_lines.length; i++) {
-		root.reset_chains();
-		movement_lines[i].set_up();
-	}
-	
-	set_up_canvas();
-	root.draw();
-	for (var i = 0; i < movement_lines.length; i++)
-		if (movement_lines[i].should_draw) movement_lines[i].draw();
-	swap_out_image();
-	//alert(JSON.stringify(root));
-}
-
-function close_brackets(str) { // And strip initial spaces
+	// Clean up the string
 	str = str.replace(/^\s+/, "");
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
@@ -393,7 +389,58 @@ function close_brackets(str) { // And strip initial spaces
 		str = str + "]";
 		open--;
 	}
-	return str;
+	
+	root = parse(str);
+	root.set_siblings(null);
+	root.check_triangle();
+
+	// Find out dimensions of the tree.
+	root.set_width();
+	root.find_height();
+	root.assign_location(0, 0);
+	
+	var movement_lines = new Array();
+	root.find_movement(movement_lines);
+	for (var i = 0; i < movement_lines.length; i++) {
+		root.reset_chains();
+		movement_lines[i].set_up();
+	}
+	
+	// Set up the canvas.
+	var width = root.left_width + root.right_width + 2 * padding;
+	var height = (root.max_height) * vert_space + font_size + 2 * padding;
+	// Problem: movement lines may protrude from bottom.
+	for (var i = 0; i < movement_lines.length; i++) {
+		var m = movement_lines[i];
+		if (m.max_height == root.max_height)
+			height += vert_space;
+	}
+	// Make a new canvas. Required for IE compatability.
+	var canvas = document.createElement("canvas");
+	canvas.id = "canvas";
+	canvas.width = width;
+	canvas.height = height;
+	ctx.canvas.parentNode.replaceChild(canvas, ctx.canvas);
+	ctx = canvas.getContext('2d');
+	ctx.fillStyle = "rgb(255, 255, 255)";
+	ctx.fillRect(0, 0, width, height);
+	ctx.fillStyle = "rgb(0, 0, 0)";
+	ctx.textAlign = "center";
+	var x_shift = Math.floor(root.left_width + padding);
+	var y_shift = Math.floor(font_size + padding);
+	ctx.translate(x_shift, y_shift);
+	
+	root.draw();
+	for (var i = 0; i < movement_lines.length; i++)
+		if (movement_lines[i].should_draw) movement_lines[i].draw();
+	
+	// Swap out the image
+	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
+	new_img.id = "treeimg";
+	new_img.border = "1";
+	var old_img = document.getElementById('treeimg');
+	old_img.parentNode.replaceChild(new_img, old_img);
+	ctx.canvas.style.display = "none";
 }
 
 function subscriptify(in_str) {
@@ -490,44 +537,4 @@ function parse(str) {
 		}
 	}
 	return n;
-}
-
-function set_up_canvas() {
-	var width = root.left_width + root.right_width + 2 * padding;
-	var height = set_window_height();
-	// Make a new canvas. Required for IE compatability.
-	var canvas = document.createElement("canvas");
-	canvas.id = "canvas";
-	canvas.width = width;
-	canvas.height = height;
-	ctx.canvas.parentNode.replaceChild(canvas, ctx.canvas);
-	ctx = canvas.getContext('2d');
-	ctx.fillStyle = "rgb(255, 255, 255)";
-	ctx.fillRect(0, 0, width, height);
-	ctx.fillStyle = "rgb(0, 0, 0)";
-	ctx.textAlign = "center";
-	ctx.font = font_size + "pt " + font_style;
-	var x_shift = Math.floor(root.left_width + padding);
-	var y_shift = Math.floor(font_size + padding);
-	ctx.translate(x_shift, y_shift);
-}
-
-function swap_out_image() {
-	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
-	new_img.id = "treeimg";
-	new_img.border = "1";
-	var old_img = document.getElementById('treeimg');
-	old_img.parentNode.replaceChild(new_img, old_img);
-	ctx.canvas.style.display = "none";
-}
-
-function set_window_height() {
-	var h = (root.max_height) * vert_space + font_size + 2 * padding;
-	// Problem: movement lines may protrude from bottom.
-	for (var i = 0; i < movement_lines.length; i++) {
-		var m = movement_lines[i];
-		if (m.max_height == root.max_height)
-			h += vert_space;
-	}
-	return h;
 }
