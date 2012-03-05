@@ -1,16 +1,4 @@
-﻿
-/* TODO:
- * Quotation marks to ignore special characters.
- * Deal with empty text nodes due to <> tags. Deal with this in lexer.
- * Option to remove leaf lines
- * Colors
- * Limit how shallow movment lines can be.
- * Make linkable
- * Offset arrows
- * 
- */
-
-var debug = 0;
+﻿var debug = 0;
 var padding = 15; // Number of pixels from tree to edge on each side.
 var space_above_text = 4; // Lines will end this many pixels above text.
 var space_below_text = 4;
