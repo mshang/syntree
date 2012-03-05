@@ -3,9 +3,7 @@
  * Quotation marks to ignore special characters.
  * Deal with empty text nodes due to <> tags. Deal with this in lexer.
  * Option to remove leaf lines
- * Remove jQuery
  * Colors
- * Change movement line notation.
  * Limit how shallow movment lines can be.
  * Make linkable
  * Offset arrows
@@ -464,32 +462,18 @@ function subscriptify(in_str) {
 	return out_str;
 }
 
-function get_tail(n, str) {
-	// Get any movement information.
-	// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
-	str = str.replace(/\s*<(\w+)>\s*/, 
-		function(match, tail) {
-			n.tail = tail;
-			return " ";
-		});
-	return str;
-}
-
-function get_label(n, str) {
-	str = str.replace(/_(\w+)$/, 
-		function(match, label) {
-			n.label = label;
-			return "";
-		});
-	return str;
-}
-
 function parse(str) {
 	var n = new Node();
 	
 	if (str[0] != "[") { // Text node
 		n.type = "text";
-		str = get_tail(n, str);
+		// Get any movement information.
+		// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
+		str = str.replace(/\s*<(\w+)>\s*/, 
+			function(match, tail) {
+				n.tail = tail;
+				return " ";
+			});
 		str = str.replace(/^\s+/, "");
 		str = str.replace(/\s+$/, "");
 		n.value = str;
@@ -497,21 +481,21 @@ function parse(str) {
 	}
 
 	n.type = "element";
-	str = get_label(n, str);
 	var i = 1;
 	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]")) i++;
-	
-	if (str[i-1] == "*") {
-		n.starred = 1;
-		n.value = str.substr(1, i-2);
-	} else {
-		n.starred = 0;
-		n.value = str.substr(1, i-1);
-	}
-	
-	if (n.label)
-		if (n.label.search(/^\d+$/) != -1)
-			n.value = n.value + subscriptify(n.label);
+	n.value = str.substr(1, i-1)
+	n.value = n.value.replace(/\^/, 
+		function () {
+			n.starred = true;
+			return "";
+		});
+	n.value = n.value.replace(/_(\w+)$/,
+		function(match, label) {
+			n.label = label;
+			if (n.label.search(/^\d+$/) != -1)
+				return subscriptify(n.label);
+			return "";
+		});
 	
 	while (str[i] == " ") i++;
 	if (str[i] != "]") {
@@ -527,12 +511,6 @@ function parse(str) {
 				start = i;
 			}
 			if ((temp == 2) && (level == 1)) {
-				if (str[i+1] == "_") { // Must include label.
-					i += 2;
-					while (str[i].search(/\w/) > -1)
-						i++;
-					i--;
-				}
 				n.children.push(parse(str.substring(start, i+1)));
 				start = i+1;
 			}
