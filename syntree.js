@@ -309,16 +309,6 @@ MovementLine.prototype.draw = function() {
 	ctx.fill();
 }
 
-function handler() {
-	if (debug) {
-		go();
-	} else {
-		try {
-			go();
-		} catch (err) {	}
-	}
-}
-
 function go() {
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
