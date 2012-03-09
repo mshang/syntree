@@ -1,6 +1,9 @@
 <html>
 	<head>
 		<title>Syntree Help</title>
+		<style type="text/css">
+			a {text-decoration: none}
+		</style>
 	</head>
 	<body style="background-color:AntiqueWhite">
 		<h2>Help</h2>
@@ -9,15 +12,15 @@
 		<h3>How to build a tree:</h3>
 		Mark the opening of constituents with an opening square bracket followed immediately by the category of the constituent. Leave a space between the category and anything to follow. If you would like to draw a triangle instead of a line between a category and its content, put a caret ^ in the category name. This app will build the tree as you type and will attempt to close any brackets that you may be missing. You can save the image to your computer by right-clicking on it and selecting "Save image as".<br />
 		<h3>Examples:</h3>
-		<font face="monospace">[NP^ Alice]</font><br />
+		<font face="monospace"><a href="index.html?[NP^ Alice]">[NP^ Alice]</a></font><br />
 		<img src="images/alice.png" border="1" style="margin:5"/><br /><br />
-		<font face="monospace">[NP [N Alice] and [N Bob]]</font><br />
+		<font face="monospace"><a href="index.html?[NP [N Alice] and [N Bob]]">[NP [N Alice] and [N Bob]]</a></font><br />
 		<img src="images/aliceandbob.png" border="1" style="margin:5" /><br /><br />
-		<font face="monospace">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]</font><br />
+		<font face="monospace"><a href="index.html?[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]</a></font><br />
 		<img src="images/studentphysics.png" border="1" style="margin:5" /><br />
 		<h3>Movement Lines and Subscripts:</h3>
 		To show movement, mark the head of the movement with an underscore followed by a label after the category name, and the tail with the label between angled brackets. Any kind of constituent can be a head, but only leaves can be tails. The head constituent can not be an ancestor of the tail. Labels can only be strings of letters and numbers with no spaces. If your label consists of only numbers, it will show up as a subscript after the category name.<br /><br />
-		<font face="monospace">[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]</font><br />
+		<font face="monospace"><a href="index.html?[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]">[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]</a></font><br />
 		<img src="images/movement.png" border="1" style="margin:5"/><br /><br />
 	</body>
 </html>
