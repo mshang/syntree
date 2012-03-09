@@ -1,4 +1,4 @@
-Copyright (C) 2011 by Miles Shang
+Copyright (C) 2011 by Miles Shang <mail@mshang.ca>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -17,3 +17,18 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+This software uses the following libraries:
+
+base64.js
+	Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
+	Version: 1.0
+	LastModified: Dec 25 1999
+	This library is free.  You can redistribute it and/or modify it.
+
+canvas2image.js
+	Canvas2Image v0.1
+	Copyright (c) 2008 Jacob Seidelin, jseidelin@nihilogic.dk
+	MIT License [http://www.opensource.org/licenses/mit-license.php]
+
+jQuery v1.6.4 under the MIT License
