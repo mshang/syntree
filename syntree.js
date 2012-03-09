@@ -1,4 +1,4 @@
-﻿var debug = 0;
+﻿var debug = false;
 var padding = 15; // Number of pixels from tree to edge on each side.
 var space_above_text = 4; // Lines will end this many pixels above text.
 var space_below_text = 4;
@@ -13,7 +13,6 @@ var root;
 
 
 function Node() {
-	this.type = null; // "text" or "element"
 	this.value = null;
 	this.step = null; // Horizontal distance between children.
 	this.draw_triangle = null;
@@ -56,12 +55,8 @@ Node.prototype.set_siblings = function(parent) {
 
 Node.prototype.check_triangle = function() {
 	this.draw_triangle = 0;
-
-	if ((this.type == "element") &&
-		(this.children.length == 1) &&
-		(this.first.type == "text") &&
-		(this.starred))
-			this.draw_triangle = 1;
+	if ((!this.has_children) && (this.parent.starred))
+		this.draw_triangle = 1;
 
 	for (var child = this.first; child != null; child = child.next)
 		child.check_triangle();
@@ -77,7 +72,7 @@ Node.prototype.set_width = function() {
 	for (var child = this.first; child != null; child = child.next)
 		child.set_width();
 	
-	if (this.type == "text") {
+	if (!this.has_children) {
 		this.left_width = val_width / 2;
 		this.right_width = val_width / 2;
 		return;
@@ -126,9 +121,8 @@ Node.prototype.assign_location = function(x, y) {
 	this.x = Math.floor(x) + 0.5;
 	this.y = Math.floor(y) + 0.5;
 	
-	if (this.type == "element") {
+	if (this.has_children) {
 		var left_start = x - (this.step)*((this.children.length-1)/2);
-		
 		for (var i = 0; i < this.children.length; i++)
 			this.children[i].assign_location(left_start + i*(this.step), y + vert_space);
 	}
@@ -140,23 +134,23 @@ Node.prototype.draw = function() {
 		ctx.font = nonterm_font;
 	
 	ctx.fillText(this.value, this.x, this.y);
-	
-	if (this.draw_triangle) {
-		ctx.moveTo(this.x, this.y + space_below_text);
-		ctx.lineTo(this.first.x - this.first.left_width, this.first.y - font_size - space_above_text);
-		ctx.lineTo(this.first.x + this.first.right_width, this.first.y - font_size - space_above_text);
-		ctx.lineTo(this.x, this.y + space_below_text);
-		ctx.stroke();
-	} else { // Draw lines to all children
-		for (var child = this.first; child != null; child = child.next) {
-			ctx.moveTo(this.x, this.y + space_below_text);
-			ctx.lineTo(child.x, child.y - font_size - space_above_text);
-			ctx.stroke();
-		}
-	}
-	
 	for (var child = this.first; child != null; child = child.next)
 		child.draw();
+	
+	if (!this.parent) return;
+	
+	if (this.draw_triangle) {
+		ctx.moveTo(this.parent.x, this.parent.y + space_below_text);
+		ctx.lineTo(this.x - this.left_width, this.y - font_size - space_above_text);
+		ctx.lineTo(this.x + this.right_width, this.y - font_size - space_above_text);
+		ctx.lineTo(this.parent.x, this.parent.y + space_below_text);
+		ctx.stroke();
+		return;
+	}
+	
+	ctx.moveTo(this.parent.x, this.parent.y + space_below_text);
+	ctx.lineTo(this.x, this.y - font_size - space_above_text);
+	ctx.stroke();
 }
 
 Node.prototype.find_head = function(label) {
@@ -170,9 +164,8 @@ Node.prototype.find_head = function(label) {
 }
 
 Node.prototype.find_movement = function(mlarr) {
-	if (this.type == "element")
-		for (var child = this.first; child != null; child = child.next)
-			child.find_movement(mlarr);
+	for (var child = this.first; child != null; child = child.next)
+		child.find_movement(mlarr);
 	
 	if (this.tail != null) {
 		var m = new MovementLine;
@@ -329,7 +322,6 @@ function handler() {
 function go() {
 	
 	// Initialize the canvas. TODO: make this degrade gracefully.
-	// We need to set font options so that measureText works properly.
 	try {
 		ctx = document.getElementById('canvas').getContext('2d');
 	} catch (err) {
@@ -454,7 +446,6 @@ function parse(str) {
 	var n = new Node();
 	
 	if (str[0] != "[") { // Text node
-		n.type = "text";
 		// Get any movement information.
 		// Make sure to collapse any spaces around <X> to one space, even if there is no space.	
 		str = str.replace(/\s*<(\w+)>\s*/, 
@@ -468,7 +459,6 @@ function parse(str) {
 		return n;
 	}
 
-	n.type = "element";
 	var i = 1;
 	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]")) i++;
 	n.value = str.substr(1, i-1)
