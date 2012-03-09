@@ -49,6 +49,9 @@
 				<td align="right" colspan="3"><input type="range" name="horspace" 
 					style="width:100%" min="10" max="50" value="10" step="5" updateAttribute></input></td>
 			</tr>
+			<tr>
+				<td align="center" colspan="5"><button name="makelink" type="button">Link to this tree</button></td>
+			</tr>
 		</form>
 	</table><br />
 	
@@ -70,7 +73,6 @@
 	<script type="text/javascript" src="base64.js"></script>
 	<script type="text/javascript" src="canvas2image.js"></script>
 	<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
-	<script type="text/javascript" src="history.js/scripts/bundled/html4+html5/jquery.history.js"></script>
 	<script type="text/javascript" src="syntree.js"></script>
 	<script type="text/javascript">
 	
@@ -96,7 +98,10 @@
 		$(document.f.i).keyup(handler);
 		$(document.f.i).change(handler);
 		$('[updateAttribute]').change(handler);
-
+		$(document.f.makelink).click(function() {
+			var wl = window.location;
+			window.prompt ("Address:", "http://mshang.github.com/syntree?" + encodeURIComponent(document.f.i.value));
+		});
 	});
 	</script>
 	
