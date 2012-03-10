@@ -1,16 +1,10 @@
-﻿var debug = false;
-var padding = 15; // Number of pixels from tree to edge on each side.
-var space_above_text = 4; // Lines will end this many pixels above text.
-var space_below_text = 4;
-var vert_space;
-var hor_space;
-var font_size;
-var term_font;
-var nonterm_font;
-var ctx;
-var root;
+﻿// By Miles Shang <mail@mshang.ca>
+// MIT license
 
-
+var debug = true;
+var margin = 15; // Number of pixels from tree to edge on each side.
+var padding_above_text = 4; // Lines will end this many pixels above text.
+var padding_below_text = 4;
 
 function Node() {
 	this.value = null;
@@ -62,7 +56,7 @@ Node.prototype.check_triangle = function() {
 		child.check_triangle();
 }
 
-Node.prototype.set_width = function() {
+Node.prototype.set_width = function(ctx, vert_space, hor_space, term_font, nonterm_font) {
 	ctx.font = term_font;
 	if (this.has_children)
 		ctx.font = nonterm_font;
@@ -70,7 +64,7 @@ Node.prototype.set_width = function() {
 	var val_width = ctx.measureText(this.value).width;
 
 	for (var child = this.first; child != null; child = child.next)
-		child.set_width();
+		child.set_width(ctx, vert_space, hor_space, term_font, nonterm_font);
 	
 	if (!this.has_children) {
 		this.left_width = val_width / 2;
@@ -128,28 +122,28 @@ Node.prototype.assign_location = function(x, y) {
 	}
 }
 
-Node.prototype.draw = function() {
+Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font) {
 	ctx.font = term_font;
 	if (this.has_children)
 		ctx.font = nonterm_font;
 	
 	ctx.fillText(this.value, this.x, this.y);
 	for (var child = this.first; child != null; child = child.next)
-		child.draw();
+		child.draw(ctx, font_size, term_font, nonterm_font);
 	
 	if (!this.parent) return;
 	
 	if (this.draw_triangle) {
-		ctx.moveTo(this.parent.x, this.parent.y + space_below_text);
-		ctx.lineTo(this.x - this.left_width, this.y - font_size - space_above_text);
-		ctx.lineTo(this.x + this.right_width, this.y - font_size - space_above_text);
-		ctx.lineTo(this.parent.x, this.parent.y + space_below_text);
+		ctx.moveTo(this.parent.x, this.parent.y + padding_below_text);
+		ctx.lineTo(this.x - this.left_width, this.y - font_size - padding_above_text);
+		ctx.lineTo(this.x + this.right_width, this.y - font_size - padding_above_text);
+		ctx.lineTo(this.parent.x, this.parent.y + padding_below_text);
 		ctx.stroke();
 		return;
 	}
 	
-	ctx.moveTo(this.parent.x, this.parent.y + space_below_text);
-	ctx.lineTo(this.x, this.y - font_size - space_above_text);
+	ctx.moveTo(this.parent.x, this.parent.y + padding_below_text);
+	ctx.lineTo(this.x, this.y - font_size - padding_above_text);
 	ctx.stroke();
 }
 
@@ -163,9 +157,9 @@ Node.prototype.find_head = function(label) {
 	return null;
 }
 
-Node.prototype.find_movement = function(mlarr) {
+Node.prototype.find_movement = function(mlarr, root) {
 	for (var child = this.first; child != null; child = child.next)
-		child.find_movement(mlarr);
+		child.find_movement(mlarr, root);
 	
 	if (this.tail != null) {
 		var m = new MovementLine;
@@ -294,59 +288,22 @@ MovementLine.prototype.find_intervening_height = function() {
 	}
 }
 
-MovementLine.prototype.draw = function() {
-	ctx.moveTo(this.tail.x, this.tail.y + space_below_text);
+MovementLine.prototype.draw = function(ctx) {
+	ctx.moveTo(this.tail.x, this.tail.y + padding_below_text);
 	ctx.quadraticCurveTo(this.tail.x, this.bottom_y, (this.tail.x + this.dest_x) / 2, this.bottom_y);
-	ctx.quadraticCurveTo(this.dest_x, this.bottom_y, this.dest_x, this.dest_y + space_below_text);
+	ctx.quadraticCurveTo(this.dest_x, this.bottom_y, this.dest_x, this.dest_y + padding_below_text);
 	ctx.stroke();
 	// Arrowhead
 	ctx.beginPath();
-	ctx.lineTo(this.dest_x + 3, this.dest_y + space_below_text + 10);
-	ctx.lineTo(this.dest_x - 3, this.dest_y + space_below_text + 10);
-	ctx.lineTo(this.dest_x, this.dest_y + space_below_text);
+	ctx.lineTo(this.dest_x + 3, this.dest_y + padding_below_text + 10);
+	ctx.lineTo(this.dest_x - 3, this.dest_y + padding_below_text + 10);
+	ctx.lineTo(this.dest_x, this.dest_y + padding_below_text);
 	ctx.closePath();
 	ctx.fillStyle = "#000000";
 	ctx.fill();
 }
 
-function go() {
-	
-	// Initialize the canvas. TODO: make this degrade gracefully.
-	try {
-		ctx = document.getElementById('canvas').getContext('2d');
-	} catch (err) {
-		alert("Sorry, your browser is too outdated.");
-	}
-	
-	// Initialize the various options.
-	term_font = "";
-	nonterm_font = "";
-	if (document.f.termital.checked == true)
-		term_font = term_font + "italic ";
-	if (document.f.termsc.checked == true)
-		term_font = term_font + "small-caps ";
-	if (document.f.termbold.checked == true)
-		term_font = term_font + "bold ";
-	if (document.f.nontermital.checked == true)
-		nonterm_font = nonterm_font + "italic ";
-	if (document.f.nontermsc.checked == true)
-		nonterm_font = nonterm_font + "small-caps ";
-	if (document.f.nontermbold.checked == true)
-		nonterm_font = nonterm_font + "bold ";
-	font_size = parseInt(document.f.fontsize.value);
-	term_font = term_font + font_size + "pt ";
-	nonterm_font = nonterm_font + font_size + "pt ";
-	for (var i = 0; i < 3; i++)
-		if (document.f.fontstyle[i].checked) {
-			term_font = term_font + document.f.fontstyle[i].value;
-			nonterm_font = nonterm_font + document.f.fontstyle[i].value;
-		}
-	vert_space = parseInt(document.f.vertspace.value);
-	hor_space = parseInt(document.f.horspace.value);
-	
-	// Get the string.
-	var str = document.f.i.value;
-
+function go(str, font_size, term_font, nonterm_font, vert_space, hor_space) {	
 	// Clean up the string
 	str = str.replace(/^\s+/, "");
 	var open = 0;
@@ -360,57 +317,62 @@ function go() {
 		open--;
 	}
 	
-	root = parse(str);
+	var root = parse(str);
 	root.set_siblings(null);
 	root.check_triangle();
+	
+	var canvas;
+	var ctx;
+	
+	try {
+		// Make a new canvas. Required for IE compatability.
+		canvas = document.createElement("canvas");
+		ctx = canvas.getContext('2d');
+	} catch (err) {
+		throw "canvas";
+	}
 
 	// Find out dimensions of the tree.
-	root.set_width();
+	root.set_width(ctx, vert_space, hor_space, term_font, nonterm_font);
 	root.find_height();
 	root.assign_location(0, 0);
 	
 	var movement_lines = new Array();
-	root.find_movement(movement_lines);
+	root.find_movement(movement_lines, root);
 	for (var i = 0; i < movement_lines.length; i++) {
 		root.reset_chains();
 		movement_lines[i].set_up();
 	}
 	
 	// Set up the canvas.
-	var width = root.left_width + root.right_width + 2 * padding;
-	var height = (root.max_height) * vert_space + font_size + 2 * padding;
+	var width = root.left_width + root.right_width + 2 * margin;
+	var height = (root.max_height) * vert_space + font_size + 2 * margin;
 	// Problem: movement lines may protrude from bottom.
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
 		if (m.max_height == root.max_height)
 			height += vert_space;
 	}
-	// Make a new canvas. Required for IE compatability.
-	var canvas = document.createElement("canvas");
+	
 	canvas.id = "canvas";
 	canvas.width = width;
 	canvas.height = height;
-	ctx.canvas.parentNode.replaceChild(canvas, ctx.canvas);
-	ctx = canvas.getContext('2d');
 	ctx.fillStyle = "rgb(255, 255, 255)";
 	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = "rgb(0, 0, 0)";
 	ctx.textAlign = "center";
-	var x_shift = Math.floor(root.left_width + padding);
-	var y_shift = Math.floor(font_size + padding);
+	var x_shift = Math.floor(root.left_width + margin);
+	var y_shift = Math.floor(font_size + margin);
 	ctx.translate(x_shift, y_shift);
 	
-	root.draw();
+	root.draw(ctx, font_size, term_font, nonterm_font);
 	for (var i = 0; i < movement_lines.length; i++)
-		if (movement_lines[i].should_draw) movement_lines[i].draw();
+		if (movement_lines[i].should_draw) movement_lines[i].draw(ctx);
 	
 	// Swap out the image
-	var new_img = Canvas2Image.saveAsPNG(ctx.canvas, true);
-	new_img.id = "treeimg";
-	new_img.border = "1";
-	var old_img = document.getElementById('treeimg');
-	old_img.parentNode.replaceChild(new_img, old_img);
-	ctx.canvas.style.display = "none";
+	var img = Canvas2Image.saveAsPNG(canvas, true);
+	img.border = "1";
+	return img;
 }
 
 function subscriptify(in_str) {
