@@ -1,7 +1,7 @@
 ﻿// By Miles Shang <mail@mshang.ca>
 // MIT license
 
-var debug = true;
+var debug = false;
 var margin = 15; // Number of pixels from tree to edge on each side.
 var padding_above_text = 4; // Lines will end this many pixels above text.
 var padding_below_text = 4;
@@ -370,9 +370,7 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space) {
 		if (movement_lines[i].should_draw) movement_lines[i].draw(ctx);
 	
 	// Swap out the image
-	var img = Canvas2Image.saveAsPNG(canvas, true);
-	img.border = "1";
-	return img;
+	return Canvas2Image.saveAsPNG(canvas, true);
 }
 
 function subscriptify(in_str) {

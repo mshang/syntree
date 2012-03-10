@@ -16,8 +16,8 @@
 			<table>
 				<tr>
 					<td colspan="2" align="center"><div id="font-style-radio">
-						<input type="radio" name="font-style" id="serif" value="serif" class="redraw" checked /><label for="serif">Serif</label>
-						<input type="radio" name="font-style" id="sans-serif" value="sans-serif" class="redraw" /><label for="sans-serif">Sans-Serif</label>
+						<input type="radio" name="font-style" id="serif" value="serif" class="redraw" /><label for="serif">Serif</label>
+						<input type="radio" name="font-style" id="sans-serif" value="sans-serif" class="redraw" checked /><label for="sans-serif">Sans-Serif</label>
 						<input type="radio" name="font-style" id="monospace" value="monospace" class="redraw" /><label for="monospace">Monospace</label>
 					</div></td>
 				</tr>
@@ -27,14 +27,12 @@
 				</tr>
 				<tr>
 					<td align="center" width="50%"><div id="term-font-check">
-						<input type="checkbox" id="term-bold" class="redraw" /><label for="term-bold">B</label>
-						<input type="checkbox" id="term-ital" class="redraw" /><label for="term-ital">I</label>
-						<input type="checkbox" id="term-sc" class="redraw" /><label for="term-sc">SC</label>
+						<input type="checkbox" id="term-bold" class="redraw" /><label for="term-bold">Bold</label>
+						<input type="checkbox" id="term-ital" class="redraw" /><label for="term-ital">Italic</label>
 					</span></td>
 					<td align="center" width="50%"><div id="nonterm-font-check">
-						<input type="checkbox" id="nonterm-bold" class="redraw" /><label for="nonterm-bold">B</label>
-						<input type="checkbox" id="nonterm-ital" class="redraw" /><label for="nonterm-ital">I</label>
-						<input type="checkbox" id="nonterm-sc" class="redraw" /><label for="nonterm-sc">SC</label>
+						<input type="checkbox" id="nonterm-bold" class="redraw" /><label for="nonterm-bold">Bold</label>
+						<input type="checkbox" id="nonterm-ital" class="redraw" /><label for="nonterm-ital">Italic</label>
 					</span></td>
 				</tr>
 				<tr>
@@ -71,7 +69,7 @@
 	</div>
 	<br />
 
-	<div id="image-goes-here">sdf</div>
+	<div id="image-goes-here"></div>
 	
 
 
@@ -98,6 +96,7 @@ textarea {resize: none; width: 100%}
 a.example { text-decoration: none; }
 .help {text-align: left;}
 #image-goes-here { text-align: center; }
+img { border: 1px solid #bbbbbb; }
 </style>
 
 <link type="text/css" href="css/cupertino/jquery-ui-1.8.18.custom.css" rel="stylesheet" />	
@@ -115,14 +114,10 @@ try {
 	var nonterm_font = "";
 	if (document.getElementById("term-ital").checked)
 		term_font = term_font + "italic ";
-	if (document.getElementById("term-sc").checked)
-		term_font = term_font + "small-caps ";
 	if (document.getElementById("term-bold").checked)
 		term_font = term_font + "bold ";
 	if (document.getElementById("nonterm-ital").checked)
 		nonterm_font = nonterm_font + "italic ";
-	if (document.getElementById("nonterm-sc").checked)
-		nonterm_font = nonterm_font + "small-caps ";
 	if (document.getElementById("nonterm-bold").checked)
 		nonterm_font = nonterm_font + "bold ";
 	font_size = $("#font-size-slider").slider( "option", "value" );
