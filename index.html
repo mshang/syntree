@@ -162,6 +162,7 @@ $(function() {
 	try {
 		var qs = decodeURIComponent(window.location.search.slice(1));
 		qs = qs.replace(/^i=/,"");
+		qs = qs.replace(/\+/," ");
 		if (qs == "") throw "";
 		document.getElementById("i").value = qs;
 	} catch (err) {}
