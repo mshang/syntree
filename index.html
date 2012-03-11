@@ -161,6 +161,7 @@ $(function() {
 	
 	try {
 		var qs = decodeURIComponent(window.location.search.slice(1));
+		qs = qs.replace(/^i=/,"");
 		if (qs == "") throw "";
 		document.getElementById("i").value = qs;
 	} catch (err) {}
@@ -172,7 +173,7 @@ $(function() {
 	$("#i").change(function() {return handler()});
 	$(".redraw").change(function() {return handler()});
 	$("#make-link").click(function() {
-		window.prompt ("Address:", "http://mshang.github.com/syntree/?" +
+		window.prompt ("Address:", "http://mshang.github.com/syntree/?i=" +
 			encodeURIComponent(document.getElementById("i").value));
 	});
 	$("#font-size-slider").bind("slide", function (event, ui) {
