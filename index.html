@@ -18,6 +18,7 @@
 
 
 <body>
+	<a href="http://github.com/mshang/syntree"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
 	<div id="accordion">
 		<h3><a href="#">Syntax Tree Generator</a></h3><div style="text-align:left">
 			<textarea id="i" rows="3">[S [NP This] [VP [V is] [^NP a wug]]]</textarea>
@@ -68,7 +69,6 @@
 		<h3><a href="#">Help</a></h3><div class="help">
 			<h3>How to build a tree</h3>
 			<p>Use labelled square brackets to denote constituants. To draw triangles, include a caret ^ in the label. This app will build the tree as you type and will attempt to close any brackets that you may be missing. Save the image to your computer by right-clicking on it and selecting "Save image as".</p>
-			<h3>Examples:</h3>
 			<a class="example" href="index.html?[NP^ Alice]">[NP^ Alice]</a><br />
 			<a class="example" href="index.html?[NP [N Alice] and [N Bob]]">[NP [N Alice] and [N Bob]]</a><br />
 			<a class="example" href="index.html?[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]</a><br />
@@ -85,7 +85,7 @@
 
 
 <style type="text/css">
-body { font-size: small !important; font-family: sans-serif; margin: 20px; background: #ffffff;}
+body { font-size: small !important; font-family: sans-serif; margin: 20px; background-color: #ffffff}
 #accordion { margin: 0px auto; width: 500px; text-align: center; }
 table { margin: 0px auto; }
 //.ui-widget { font-size:small !important; }
