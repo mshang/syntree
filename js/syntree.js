@@ -110,7 +110,7 @@ Node.prototype.assign_location = function(x, y, font_size, term_lines) {
 		for (var i = 0; i < this.children.length; i++)
 			this.children[i].assign_location(left_start + i*(this.step), y + vert_space, font_size, term_lines);
 	} else {
-		if ((this.parent) && (!term_lines) && (this.parent.children.length == 1))
+		if ((this.parent) && (!term_lines) && (this.parent.children.length == 1) && (!this.draw_triangle))
 			this.y = this.parent.y + padding_above_text + padding_below_text + font_size;
 	}
 }
@@ -133,8 +133,6 @@ Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color, t
 	
 	if (!this.parent) return;
 	
-	if ((!this.has_children) && (!term_lines) && (this.parent.children.length == 1)) return;
-	
 	if (this.draw_triangle) {
 		ctx.moveTo(this.parent.x, this.parent.y + padding_below_text);
 		ctx.lineTo(this.x - this.left_width, this.y - font_size - padding_above_text);
@@ -143,6 +141,8 @@ Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color, t
 		ctx.stroke();
 		return;
 	}
+	
+	if ((!this.has_children) && (!term_lines) && (this.parent.children.length == 1)) return;
 	
 	ctx.moveTo(this.parent.x, this.parent.y + padding_below_text);
 	ctx.lineTo(this.x, this.y - font_size - padding_above_text);
