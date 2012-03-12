@@ -174,28 +174,19 @@ Node.prototype.reset_chains = function() {
 		child.reset_chains();
 }
 
-Node.prototype.find_intervening_height = function(direction) {
+Node.prototype.find_intervening_height = function(leftwards) {
 	var max_y = this.y;
 	
-	if (!this.has_children) return this.y;
-	
-	var child = this.first;
-	for (; child != null; child = child.next) {
-		if ((child.head_chain) || (child.tail_chain)) {
-			max_y = Math.max(child.find_intervening_height(direction), max_y);
-			break;
-		}
+	var n = this;
+	while (true) {
+		if (leftwards) {n = n.previous;} else {n = n.next;}
+		if (!n) break;
+		if ((n.head_chain) || (n.tail_chain)) return max_y;
+		max_y = Math.max(max_y, n.max_y);
 	}
 	
-	if (child == null) return this.max_y;
-	
-	while (child != null) {
-		if (direction == "right") child = child.next;
-		if (direction == "left") child = child.previous;
-		if (child != null)
-			max_y = Math.max(child.max_y, max_y);
-	}
-	
+	max_y = Math.max(max_y, 
+		this.parent.find_intervening_height(leftwards));
 	return max_y;
 }
 
@@ -208,6 +199,7 @@ function MovementLine() {
 	this.bottom_y = null;
 	this.max_y = null;
 	this.should_draw = null;
+	this.leftwards = null;
 }
 
 MovementLine.prototype.set_up = function() {
@@ -257,25 +249,17 @@ MovementLine.prototype.find_lca = function() {
 }
 
 MovementLine.prototype.find_intervening_height = function() {
-	this.max_y = 0;
-	var n = this.lca;
-	var child = n.first;
-	for (; child != null; child = child.next) {
+	for (var child = this.lca.first; child != null; child = child.next) {
 		if ((child.head_chain) || (child.tail_chain)) {
-			this.max_y = Math.max(child.find_intervening_height("right"), this.max_y);
-			child = child.next;
+			this.leftwards = false;
+			if (child.head_chain) this.leftwards = true;
 			break;
 		}
 	}
 	
-	for (; child != null; child = child.next) {
-		if ((child.head_chain) || (child.tail_chain)) {
-			this.max_y = Math.max(child.find_intervening_height("left"), this.max_y);
-			break;
-		} else {
-			this.max_y = Math.max(child.max_y, this.max_y);
-		}
-	}
+	this.max_y = Math.max(this.tail.find_intervening_height( this.leftwards), 
+	                      this.head.find_intervening_height(!this.leftwards),
+						  this.head.max_y);
 }
 
 MovementLine.prototype.draw = function(ctx) {
@@ -338,11 +322,10 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 	var width = root.left_width + root.right_width + 2 * margin;
 	var height = root.max_y + font_size + 2 * margin;
 	// Problem: movement lines may protrude from bottom.
-	for (var i = 0; i < movement_lines.length; i++) {
-		var m = movement_lines[i];
-		if (m.max_y == root.max_y)
-			height += vert_space;
-	}
+	for (var i = 0; i < movement_lines.length; i++)
+		if (movement_lines[i].max_y == root.max_y) {
+			height += vert_space; break;
+		}
 	
 	canvas.id = "canvas";
 	canvas.width = width;
