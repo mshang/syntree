@@ -268,8 +268,15 @@ MovementLine.prototype.find_intervening_height = function() {
 }
 
 MovementLine.prototype.draw = function(ctx) {
-	ctx.moveTo(this.tail.x, this.tail.y + padding_below_text);
-	ctx.quadraticCurveTo(this.tail.x, this.bottom_y, (this.tail.x + this.dest_x) / 2, this.bottom_y);
+	var tail_x = this.tail.x + 3;
+	this.dest_x -= 3;
+	if (this.leftwards) {
+		tail_x -= 6;
+		this.dest_x += 6;
+	}
+	
+	ctx.moveTo(tail_x, this.tail.y + padding_below_text);
+	ctx.quadraticCurveTo(tail_x, this.bottom_y, (tail_x + this.dest_x) / 2, this.bottom_y);
 	ctx.quadraticCurveTo(this.dest_x, this.bottom_y, this.dest_x, this.dest_y + padding_below_text);
 	ctx.stroke();
 	// Arrowhead
