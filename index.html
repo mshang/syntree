@@ -71,16 +71,12 @@
 		</div>
 	
 		<h3><a href="#">Help</a></h3><div class="help">
-			<h3>How to build a tree</h3>
-			<p>Use labelled square brackets to denote constituants. To draw triangles, include a caret ^ in the label. This app will build the tree as you type and will attempt to close any brackets that you may be missing. Save the image to your computer by right-clicking on it and selecting "Save image as".</p>
-			<a class="example" href="index.html?i=[NP^ Alice]">[NP^ Alice]</a><br />
-			<a class="example" href="index.html?i=[NP [N Alice] and [N Bob]]">[NP [N Alice] and [N Bob]]</a><br />
-			<a class="example" href="index.html?i=[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]</a><br />
-			<h3>Movement Lines and Subscripts:</h3>
-			<p>To show movement, mark the head of the movement with an underscore followed by a tag after the category label. Mark the tail with the same tag between angled brackets. The head constituent can not be an ancestor of the tail. Tags can only consist of letters and numbers. Tags that consist of only numbers will appear in subscript after the category label.</p>
-			<a class="example" href="index.html?i=[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]">[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]</a>
-			<h3>Download</h3>
-			<p>Click <a href="https://github.com/mshang/syntree/zipball/master">here</a> to download this app for offline use. Extract the .zip file to a location of your choice. To run the app, go to that location and run "index.html". In Internet Explorer, you may have to click "Allow blocked content" for trees to appear.</p>
+			<p>Use labelled bracket notation. This app will build the tree as you type and will attempt to close any brackets that you may be missing. Save the image to your computer by right-clicking on it and selecting "Save image as". For more information, visit the <a href="https://github.com/mshang/syntree/wiki">wiki</a>.</p>
+			<h3>Examples (links)</h3>
+			<a href="index.html?i=[NP^ Alice]">"Alice"</a><br />
+			<a href="index.html?i=[NP [N Alice] and [N Bob]]">"Alice and Bob"</a><br />
+			<a href="index.html?i=[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]">"Alice is a student of physics."</a><br />
+			<a href="index.html?i=[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]">"What did you eat?"</a>
 		</div>
 	</div>
 	<br />
@@ -95,7 +91,7 @@ table { margin: 0px auto; }
 //.ui-widget { font-size:small !important; }
 td {font-size:small !important;}
 textarea {resize: none; width: 100%}
-a.example { text-decoration: none; }
+//a.example { text-decoration: none; }
 .help {text-align: left;}
 #image-goes-here { text-align: center; }
 img { border: 1px solid #bbbbbb; }
