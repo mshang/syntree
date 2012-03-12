@@ -100,7 +100,7 @@ Node.prototype.find_height = function() {
 	return this.max_y;
 }
 
-Node.prototype.assign_location = function(x, y) {
+Node.prototype.assign_location = function(x, y, font_size, term_lines) {
 	// floor + 0.5 for antialiasing
 	this.x = Math.floor(x) + 0.5;
 	this.y = Math.floor(y) + 0.5;
@@ -108,11 +108,14 @@ Node.prototype.assign_location = function(x, y) {
 	if (this.has_children) {
 		var left_start = x - (this.step)*((this.children.length-1)/2);
 		for (var i = 0; i < this.children.length; i++)
-			this.children[i].assign_location(left_start + i*(this.step), y + vert_space);
+			this.children[i].assign_location(left_start + i*(this.step), y + vert_space, font_size, term_lines);
+	} else {
+		if ((this.parent) && (!term_lines) && (this.parent.children.length == 1))
+			this.y = this.parent.y + padding_above_text + padding_below_text + font_size;
 	}
 }
 
-Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color) {
+Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color, term_lines) {
 	ctx.font = term_font;
 	if (this.has_children)
 		ctx.font = nonterm_font;
@@ -126,9 +129,11 @@ Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color) {
 	
 	ctx.fillText(this.value, this.x, this.y);
 	for (var child = this.first; child != null; child = child.next)
-		child.draw(ctx, font_size, term_font, nonterm_font, color);
+		child.draw(ctx, font_size, term_font, nonterm_font, color, term_lines);
 	
 	if (!this.parent) return;
+	
+	if ((!this.has_children) && (!term_lines) && (this.parent.children.length == 1)) return;
 	
 	if (this.draw_triangle) {
 		ctx.moveTo(this.parent.x, this.parent.y + padding_below_text);
@@ -277,7 +282,7 @@ MovementLine.prototype.draw = function(ctx) {
 	ctx.fill();
 }
 
-function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color) {	
+function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color, term_lines) {	
 	// Clean up the string
 	str = str.replace(/^\s+/, "");
 	var open = 0;
@@ -308,7 +313,7 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 
 	// Find out dimensions of the tree.
 	root.set_width(ctx, vert_space, hor_space, term_font, nonterm_font);
-	root.assign_location(0, 0);
+	root.assign_location(0, 0, font_size, term_lines);
 	root.find_height();
 	
 	var movement_lines = new Array();
@@ -338,7 +343,7 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 	var y_shift = Math.floor(font_size + margin);
 	ctx.translate(x_shift, y_shift);
 	
-	root.draw(ctx, font_size, term_font, nonterm_font, color);
+	root.draw(ctx, font_size, term_font, nonterm_font, color, term_lines);
 	for (var i = 0; i < movement_lines.length; i++)
 		if (movement_lines[i].should_draw) movement_lines[i].draw(ctx);
 	

@@ -61,8 +61,11 @@
 					<td width="100%"><div id="hor-space-slider"></div></td>
 				</tr>
 				<tr>
-					<td align="center"><button id="make-link" type="button">Link to this tree</button></td>
-					<td align="center"><input type="checkbox" id="color-check" class="redraw" checked /><label for="color-check">Color</label></td>
+					<td align="center" colspan="2">
+						<input type="checkbox" id="color-check" class="redraw" checked /><label for="color-check">Color</label>
+						<input type="checkbox" id="term-lines" class="redraw" checked /><label for="term-lines">Terminal lines</label>
+						<a href="#" id="make-link">Link</a>
+					</td>
 				</tr>
 			</table>
 		</div>
@@ -112,6 +115,7 @@ try {
 	var term_font = "";
 	var nonterm_font = "";
 	var color = false;
+	var term_lines = false;
 	if (document.getElementById("term-ital").checked)
 		term_font = term_font + "italic ";
 	if (document.getElementById("term-bold").checked)
@@ -122,6 +126,8 @@ try {
 		nonterm_font = nonterm_font + "bold ";
 	if (document.getElementById("color-check").checked)
 		color = true;
+	if (document.getElementById("term-lines").checked)
+		term_lines = true;
 	font_size = $("#font-size-slider").slider( "option", "value" );
 	vert_space = $("#vert-space-slider").slider( "option", "value" );
 	hor_space = $("#hor-space-slider").slider( "option", "value" );
@@ -139,7 +145,7 @@ try {
 	/*$("#image-goes-here").text(str + ", " + font_size + ", " + 
 		term_font + ", " + nonterm_font + ", " + vert_space + ", " + hor_space);*/
 	
-	var img = go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color);
+	var img = go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color, term_lines);
 	$("#image-goes-here").empty();
 	$("#image-goes-here").append(img);
 	
@@ -156,8 +162,7 @@ return false;
 
 $(function() {
 	// UI
-	$("#make-link").button();
-	$("#color-check").button();
+	$("#make-link, #color-check, #term-lines").button();
 	$("#font-size-slider").slider({value: 12, min: 8, max: 16, step: 1});
 	$("#vert-space-slider").slider({value: 35, min: 35, max: 70, step: 5});
 	$("#hor-space-slider").slider({value: 10, min: 10, max: 50, step: 5});
@@ -179,8 +184,9 @@ $(function() {
 	$("#i").change(function() {return handler()});
 	$(".redraw").change(function() {return handler()});
 	$("#make-link").click(function() {
-		window.prompt ("Address:", "http://mshang.github.com/syntree/?i=" +
+		window.prompt ("Link for this tree:", "http://mshang.github.com/syntree/?i=" +
 			encodeURIComponent(document.getElementById("i").value));
+		return false;
 	});
 	$("#font-size-slider").bind("slide", function (event, ui) {
 		handler(ui.value, null, null); return true;
