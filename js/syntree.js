@@ -1,7 +1,7 @@
 ﻿// By Miles Shang <mail@mshang.ca>
 // MIT license
 
-var debug = false;
+var debug = true;
 var margin = 15; // Number of pixels from tree to edge on each side.
 var padding_above_text = 6; // Lines will end this many pixels above text.
 var padding_below_text = 6;
@@ -12,8 +12,7 @@ function Node() {
 	this.draw_triangle = null;
 	this.label = null; // Head of movement.
 	this.tail = null; // Tail of movement.
-	this.height = null; // Distance from root, where root has height 0.
-	this.max_height = null; // Distance of the descendent of this node that is farthest from root.
+	this.max_y = null; // Distance of the descendent of this node that is farthest from root.
 	this.children = new Array();
 	this.has_children;
 	this.first = null;
@@ -95,19 +94,10 @@ Node.prototype.set_width = function(ctx, vert_space, hor_space, term_font, nonte
 }
 
 Node.prototype.find_height = function() {
-	if (this.parent == null) {
-		this.height = 0;
-	} else {
-		this.height = this.parent.height + 1;
-	}
-	
-	this.max_height = 0;
-	if (!this.has_children) this.max_height = this.height;
-	
-	for (var child = this.first; child != null; child = child.next) {
-		child.find_height();
-		this.max_height = Math.max(this.max_height, child.max_height);
-	}
+	this.max_y = this.y;
+	for (var child = this.first; child != null; child = child.next)
+		this.max_y = Math.max(this.max_y, child.find_height());
+	return this.max_y;
 }
 
 Node.prototype.assign_location = function(x, y) {
@@ -185,35 +175,28 @@ Node.prototype.reset_chains = function() {
 }
 
 Node.prototype.find_intervening_height = function(direction) {
-	var length = this.children.length;
-	var max_height = this.height;
+	var max_y = this.y;
 	
-	if (!this.has_children) return this.height;
-	
-	if (direction == "all") {
-		for (var child = this.first; child != null; child = child.next)
-			max_height = Math.max(child.find_intervening_height("all"), max_height);
-		return max_height;
-	}
+	if (!this.has_children) return this.y;
 	
 	var child = this.first;
 	for (; child != null; child = child.next) {
 		if ((child.head_chain) || (child.tail_chain)) {
-			max_height = Math.max(child.find_intervening_height(direction), max_height);
+			max_y = Math.max(child.find_intervening_height(direction), max_y);
 			break;
 		}
 	}
 	
-	if (child == null) return this.max_height;
+	if (child == null) return this.max_y;
 	
 	while (child != null) {
 		if (direction == "right") child = child.next;
 		if (direction == "left") child = child.previous;
 		if (child != null)
-			max_height = Math.max(child.find_intervening_height("all"), max_height);
+			max_y = Math.max(child.max_y, max_y);
 	}
 	
-	return max_height;
+	return max_y;
 }
 
 function MovementLine() {
@@ -223,7 +206,7 @@ function MovementLine() {
 	this.dest_x = null;
 	this.dest_y = null;
 	this.bottom_y = null;
-	this.max_height = null;
+	this.max_y = null;
 	this.should_draw = null;
 }
 
@@ -242,8 +225,8 @@ MovementLine.prototype.set_up = function() {
 	this.find_intervening_height();
 	
 	this.dest_x = this.head.x;
-	this.dest_y = this.head.max_height * vert_space;
-	this.bottom_y = (this.max_height + 1) * vert_space;
+	this.dest_y = this.head.max_y;
+	this.bottom_y = this.max_y + vert_space;
 	this.should_draw = 1;
 	return;
 }
@@ -274,12 +257,12 @@ MovementLine.prototype.find_lca = function() {
 }
 
 MovementLine.prototype.find_intervening_height = function() {
-	this.max_height = 0;
+	this.max_y = 0;
 	var n = this.lca;
 	var child = n.first;
 	for (; child != null; child = child.next) {
 		if ((child.head_chain) || (child.tail_chain)) {
-			this.max_height = Math.max(child.find_intervening_height("right"), this.max_height);
+			this.max_y = Math.max(child.find_intervening_height("right"), this.max_y);
 			child = child.next;
 			break;
 		}
@@ -287,10 +270,10 @@ MovementLine.prototype.find_intervening_height = function() {
 	
 	for (; child != null; child = child.next) {
 		if ((child.head_chain) || (child.tail_chain)) {
-			this.max_height = Math.max(child.find_intervening_height("left"), this.max_height);
+			this.max_y = Math.max(child.find_intervening_height("left"), this.max_y);
 			break;
 		} else {
-			this.max_height = Math.max(child.find_intervening_height("all"), this.max_height);
+			this.max_y = Math.max(child.max_y, this.max_y);
 		}
 	}
 }
@@ -341,8 +324,8 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 
 	// Find out dimensions of the tree.
 	root.set_width(ctx, vert_space, hor_space, term_font, nonterm_font);
-	root.find_height();
 	root.assign_location(0, 0);
+	root.find_height();
 	
 	var movement_lines = new Array();
 	root.find_movement(movement_lines, root);
@@ -353,11 +336,11 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 	
 	// Set up the canvas.
 	var width = root.left_width + root.right_width + 2 * margin;
-	var height = (root.max_height) * vert_space + font_size + 2 * margin;
+	var height = root.max_y + font_size + 2 * margin;
 	// Problem: movement lines may protrude from bottom.
 	for (var i = 0; i < movement_lines.length; i++) {
 		var m = movement_lines[i];
-		if (m.max_height == root.max_height)
+		if (m.max_y == root.max_y)
 			height += vert_space;
 	}
 	

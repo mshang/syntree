@@ -145,7 +145,7 @@ try {
 	
 } catch (err) {
 	if (debug) {
-		alert(err);
+		throw(err);
 	} else { 
 		if (err == "canvas")
 			$("#image-goes-here").text("Browser not supported.");
