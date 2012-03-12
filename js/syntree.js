@@ -3,8 +3,8 @@
 
 var debug = false;
 var margin = 15; // Number of pixels from tree to edge on each side.
-var padding_above_text = 4; // Lines will end this many pixels above text.
-var padding_below_text = 4;
+var padding_above_text = 6; // Lines will end this many pixels above text.
+var padding_below_text = 6;
 
 function Node() {
 	this.value = null;
@@ -122,14 +122,21 @@ Node.prototype.assign_location = function(x, y) {
 	}
 }
 
-Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font) {
+Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color) {
 	ctx.font = term_font;
 	if (this.has_children)
 		ctx.font = nonterm_font;
+		
+	ctx.fillStyle = "black";
+	if (color) {
+		ctx.fillStyle = "green";
+		if (this.has_children)
+			ctx.fillStyle = "blue";
+	}
 	
 	ctx.fillText(this.value, this.x, this.y);
 	for (var child = this.first; child != null; child = child.next)
-		child.draw(ctx, font_size, term_font, nonterm_font);
+		child.draw(ctx, font_size, term_font, nonterm_font, color);
 	
 	if (!this.parent) return;
 	
@@ -303,7 +310,7 @@ MovementLine.prototype.draw = function(ctx) {
 	ctx.fill();
 }
 
-function go(str, font_size, term_font, nonterm_font, vert_space, hor_space) {	
+function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color) {	
 	// Clean up the string
 	str = str.replace(/^\s+/, "");
 	var open = 0;
@@ -365,7 +372,7 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space) {
 	var y_shift = Math.floor(font_size + margin);
 	ctx.translate(x_shift, y_shift);
 	
-	root.draw(ctx, font_size, term_font, nonterm_font);
+	root.draw(ctx, font_size, term_font, nonterm_font, color);
 	for (var i = 0; i < movement_lines.length; i++)
 		if (movement_lines[i].should_draw) movement_lines[i].draw(ctx);
 	

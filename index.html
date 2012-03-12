@@ -53,15 +53,16 @@
 					<td width="100%"><div id="font-size-slider"></div></td>
 				</tr>
 				<tr>
-					<td align="left">Vertical spacing:</td>
+					<td align="left">Height:</td>
 					<td width="100%"><div id="vert-space-slider"></div></td>
 				</tr>
 				<tr>
-					<td align="left">Horizontal spacing:</td>
+					<td align="left">Width:</td>
 					<td width="100%"><div id="hor-space-slider"></div></td>
 				</tr>
 				<tr>
-					<td colspan="2" align="center"><button id="make-link" type="button">Link to this tree</button></td>
+					<td align="center"><button id="make-link" type="button">Link to this tree</button></td>
+					<td align="center"><input type="checkbox" id="color-check" class="redraw" checked /><label for="color-check">Color</label></td>
 				</tr>
 			</table>
 		</div>
@@ -69,12 +70,12 @@
 		<h3><a href="#">Help</a></h3><div class="help">
 			<h3>How to build a tree</h3>
 			<p>Use labelled square brackets to denote constituants. To draw triangles, include a caret ^ in the label. This app will build the tree as you type and will attempt to close any brackets that you may be missing. Save the image to your computer by right-clicking on it and selecting "Save image as".</p>
-			<a class="example" href="index.html?[NP^ Alice]">[NP^ Alice]</a><br />
-			<a class="example" href="index.html?[NP [N Alice] and [N Bob]]">[NP [N Alice] and [N Bob]]</a><br />
-			<a class="example" href="index.html?[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]</a><br />
+			<a class="example" href="index.html?i=[NP^ Alice]">[NP^ Alice]</a><br />
+			<a class="example" href="index.html?i=[NP [N Alice] and [N Bob]]">[NP [N Alice] and [N Bob]]</a><br />
+			<a class="example" href="index.html?i=[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]">[S[NP[N Alice]][VP[V is][NP[N'[N a student][PP^ of physics]]]]]</a><br />
 			<h3>Movement Lines and Subscripts:</h3>
 			<p>To show movement, mark the head of the movement with an underscore followed by a tag after the category label. Mark the tail with the same tag between angled brackets. The head constituent can not be an ancestor of the tail. Tags can only consist of letters and numbers. Tags that consist of only numbers will appear in subscript after the category label.</p>
-			<a class="example" href="index.html?[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]">[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]</a>
+			<a class="example" href="index.html?i=[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]">[CP [NP^_1 What] [C' [C_b did] [IP_2 [NP^ you] [I' [I tr&lt;b&gt;] [VP [V' [V eat] tr&lt;1&gt;]]]]]]</a>
 			<h3>Download</h3>
 			<p>Click <a href="https://github.com/mshang/syntree/zipball/master">here</a> to download this app for offline use. Extract the .zip file to a location of your choice. To run the app, go to that location and run "index.html". In Internet Explorer, you may have to click "Allow blocked content" for trees to appear.</p>
 		</div>
@@ -110,6 +111,7 @@ try {
 	// Initialize the various options.
 	var term_font = "";
 	var nonterm_font = "";
+	var color = false;
 	if (document.getElementById("term-ital").checked)
 		term_font = term_font + "italic ";
 	if (document.getElementById("term-bold").checked)
@@ -118,6 +120,8 @@ try {
 		nonterm_font = nonterm_font + "italic ";
 	if (document.getElementById("nonterm-bold").checked)
 		nonterm_font = nonterm_font + "bold ";
+	if (document.getElementById("color-check").checked)
+		color = true;
 	font_size = $("#font-size-slider").slider( "option", "value" );
 	vert_space = $("#vert-space-slider").slider( "option", "value" );
 	hor_space = $("#hor-space-slider").slider( "option", "value" );
@@ -135,7 +139,7 @@ try {
 	/*$("#image-goes-here").text(str + ", " + font_size + ", " + 
 		term_font + ", " + nonterm_font + ", " + vert_space + ", " + hor_space);*/
 	
-	var img = go(str, font_size, term_font, nonterm_font, vert_space, hor_space);
+	var img = go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color);
 	$("#image-goes-here").empty();
 	$("#image-goes-here").append(img);
 	
@@ -153,8 +157,9 @@ return false;
 $(function() {
 	// UI
 	$("#make-link").button();
+	$("#color-check").button();
 	$("#font-size-slider").slider({value: 12, min: 8, max: 16, step: 1});
-	$("#vert-space-slider").slider({value: 40, min: 30, max: 70, step: 5});
+	$("#vert-space-slider").slider({value: 35, min: 35, max: 70, step: 5});
 	$("#hor-space-slider").slider({value: 10, min: 10, max: 50, step: 5});
 	$("#font-style-radio, #term-font-check, #nonterm-font-check").buttonset();
 	$("#accordion").accordion({collapsible: true, icons: false, autoHeight: false});
