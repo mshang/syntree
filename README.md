@@ -7,6 +7,6 @@ The goal of this project is to create a browser-based, fully local syntax tree g
 * Adjustable appearance.
 * Linkable, i.e. parses the query string.
 
-The app can be found at <http://mshang.github.com/syntree/>
+The app can be found at <http://mshang.github.com/syntree/>. If you publish a paper with a tree drawn by this app, I would appreciate it if you sent me a link to your paper.
 
 For more details, see the [wiki](https://github.com/mshang/syntree/wiki).
