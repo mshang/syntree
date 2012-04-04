@@ -7,9 +7,8 @@
 
 	<script type="text/javascript">
 	var _gaq = _gaq || [];
-	_gaq.push(['_setAccount', 'UA-29882027-1']);
+	_gaq.push(['_setAccount', 'UA-25344866-1']);
 	_gaq.push(['_trackPageview']);
-
 	(function() {
 		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
@@ -24,7 +23,7 @@
 	<div id="accordion">
 		<h3><a href="#">Syntax Tree Generator</a></h3><div style="text-align:left">
 			<textarea id="i" rows="3">[S [NP This] [VP [V is] [^NP a wug]]]</textarea>
-			(C) 2011 by <a href="mailto:mail@mshang.ca">Miles Shang</a>, see <a href="LICENSE.txt">license</a>.
+			(C) 2011 by <a href="http://mshang.ca/">Miles Shang</a>, see <a href="LICENSE.txt">license</a>.
 		</div>
 		
 		<h3><a href="#">Options</a></h3><div>
@@ -178,8 +177,10 @@ $(function() {
 	handler();
 	
 	// Events
-	$("#i").keyup(function() {return handler()});
-	$("#i").change(function() {return handler()});
+	$("#i").keypress(function() {handler(); return true;});
+	$("#i").keyup(function() {handler(); return true;});
+	$("#i").keydown(function() {handler(); return true;});
+	$("#i").change(function() {handler(); return true;});
 	$(".redraw").change(function() {return handler()});
 	$("#make-link").click(function() {
 		window.prompt ("Link for this tree:", "http://mshang.ca/syntree/?i=" +
