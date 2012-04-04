@@ -7,6 +7,11 @@ The goal of this project is to create a browser-based, fully local syntax tree g
 * Adjustable appearance.
 * Linkable, i.e. parses the query string.
 
+For more details, see the [wiki](https://github.com/mshang/syntree/wiki).
+
 The app can be found at <http://mshang.ca/syntree/>. If you publish a paper with a tree drawn by this app, I would appreciate it if you sent me a link to your paper.
 
-For more details, see the [wiki](https://github.com/mshang/syntree/wiki).
+By the way, here are a few great alternatives:
+
+* [phpSyntaxTree](http://ironcreek.net/phpsyntaxtree/)
+* [RSyntaxTree](http://www.yohasebe.com/rsyntaxtree/)
