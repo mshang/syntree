@@ -297,7 +297,10 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 		if (str[i] == "[") open++;
 		if (str[i] == "]") open--;
 	}
-	if (open < 0) throw "Too many open brackets.";
+	while (open < 0) {
+		str = "[" + str;
+		open++;
+	}
 	while (open > 0) {
 		str = str + "]";
 		open--;
