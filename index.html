@@ -28,45 +28,47 @@
 		
 		<h3><a href="#">Options</a></h3><div>
 			<table>
+				<col width="1*">
+				<col width="1*">
 				<tr>
-					<td colspan="2" align="center"><div id="font-style-radio">
+					<td colspan="2" align="center"><div id="font-style-radio" class="nobr">
 						<input type="radio" name="font-style" id="serif" value="serif" class="redraw" /><label for="serif">Serif</label>
 						<input type="radio" name="font-style" id="sans-serif" value="sans-serif" class="redraw" checked /><label for="sans-serif">Sans-Serif</label>
 						<input type="radio" name="font-style" id="monospace" value="monospace" class="redraw" /><label for="monospace">Monospace</label>
 					</div></td>
 				</tr>
 				<tr>
-					<td align="center" width="50%">Terminals:</td>
-					<td align="center" width="50%">Non-terminals:</td>
+					<td align="center">Terminals:</td>
+					<td align="center">Non-terminals:</td>
 				</tr>
 				<tr>
-					<td align="center" width="50%"><div id="term-font-check">
+					<td align="center"><div id="term-font-check" class="nobr">
 						<input type="checkbox" id="term-bold" class="redraw" /><label for="term-bold">Bold</label>
 						<input type="checkbox" id="term-ital" class="redraw" /><label for="term-ital">Italic</label>
 					</span></td>
-					<td align="center" width="50%"><div id="nonterm-font-check">
+					<td align="center"><div id="nonterm-font-check" class="nobr">
 						<input type="checkbox" id="nonterm-bold" class="redraw" /><label for="nonterm-bold">Bold</label>
 						<input type="checkbox" id="nonterm-ital" class="redraw" /><label for="nonterm-ital">Italic</label>
 					</span></td>
 				</tr>
 				<tr>
 					<td align="left">Font size:</td>
-					<td width="100%"><div id="font-size-slider"></div></td>
+					<td><div id="font-size-slider"></div></td>
 				</tr>
 				<tr>
 					<td align="left">Height:</td>
-					<td width="100%"><div id="vert-space-slider"></div></td>
+					<td><div id="vert-space-slider"></div></td>
 				</tr>
 				<tr>
 					<td align="left">Width:</td>
-					<td width="100%"><div id="hor-space-slider"></div></td>
+					<td><div id="hor-space-slider"></div></td>
 				</tr>
 				<tr>
-					<td align="center" colspan="2">
+					<td align="center" colspan="2"><div class="nobr">
 						<input type="checkbox" id="color-check" class="redraw" checked /><label for="color-check">Color</label>
 						<input type="checkbox" id="term-lines" class="redraw" checked /><label for="term-lines">Terminal lines</label>
 						<a href="#" id="make-link">Link</a>
-					</td>
+					</div></td>
 				</tr>
 			</table>
 		</div>
@@ -96,6 +98,7 @@ a.example { text-decoration: none; color: #4183C4!important; }
 .help {text-align: left;}
 #image-goes-here { text-align: center; }
 img { border: 1px solid #bbbbbb; }
+.nobr { white-space: nowrap; }
 </style>
 
 <link type="text/css" href="css/cupertino/jquery-ui-1.8.18.custom.css" rel="stylesheet" />	
