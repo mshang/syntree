@@ -22,7 +22,7 @@
 	<a href="https://github.com/mshang/syntree"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
 	<div id="accordion">
 		<h3><a href="#">Syntax Tree Generator</a></h3><div style="text-align:left">
-			<textarea id="i" rows="3">[S [NP This] [VP [V is] [^NP a wug]]]</textarea>
+			<textarea id="i" rows="15">[S [NP This] [VP [V is] [^NP a wug]]]</textarea>
 			(C) 2011 by <a href="http://mshang.ca/">Miles Shang</a>, see <a href="LICENSE.txt">license</a>.
 		</div>
 		
@@ -186,7 +186,10 @@ $(function() {
 	$("#i").change(function() {handler(); return true;});
 	$(".redraw").change(function() {return handler()});
 	$("#make-link").click(function() {
-		window.prompt ("Link for this tree:", "http://mshang.ca/syntree/?i=" +
+		var loc = window.location.href;
+		loc.replace(window.location.search, "");
+		
+		window.prompt ("Link for this tree:", loc + "?i=" +
 			encodeURIComponent(document.getElementById("i").value));
 		return false;
 	});
