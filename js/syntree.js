@@ -14,9 +14,6 @@ function Node() {
 	this.tail = null; // Tail of movement.
 	this.max_y = null; // Distance of the descendent of this node that is farthest from root.
 	this.children = new Array();
-	this.has_children;
-	this.first = null;
-	this.last = null;
 	this.parent = null;
 	this.next = null;
 	this.previous = null;
@@ -28,44 +25,30 @@ function Node() {
 }
 
 Node.prototype.set_siblings = function(parent) {
-	for (var i = 0; i < this.children.length; i++)
-		this.children[i].set_siblings(this);
-	
-	this.has_children = (this.children.length > 0);
+	this.children.forEach(this.set_siblings.curry(this).argThis());
 	this.parent = parent;
-	
-	if (this.has_children) {
-		this.first = this.children[0];
-		this.last = this.children[this.children.length - 1];
-	}
-	
-	for (var i = 0; i < this.children.length - 1; i++)
-		this.children[i].next = this.children[i+1];
-	
-	for (var i = 1; i < this.children.length; i++)
-		this.children[i].previous = this.children[i-1];
 }
 
 Node.prototype.check_triangle = function() {
 	this.draw_triangle = 0;
-	if ((!this.has_children) && (this.parent.starred))
+	if ((!this.children.nonEmpty()) && (this.parent.starred))
 		this.draw_triangle = 1;
 
-	for (var child = this.first; child != null; child = child.next)
-		child.check_triangle();
+	this.children.forEach(child.check_triangle.argThis());
 }
 
 Node.prototype.set_width = function(ctx, vert_space, hor_space, term_font, nonterm_font) {
 	ctx.font = term_font;
-	if (this.has_children)
+	if (this.children.nonEmpty())
 		ctx.font = nonterm_font;
 
 	var val_width = ctx.measureText(this.value).width;
 
-	for (var child = this.first; child != null; child = child.next)
-		child.set_width(ctx, vert_space, hor_space, term_font, nonterm_font);
+	this.children.forEach(
+		this.set_width.curry(ctx, vert_space, hor_space, term_font, nonterm_font)
+		  .argThis());
 	
-	if (!this.has_children) {
+	if (!this.children.nonEmpty()) {
 		this.left_width = val_width / 2;
 		this.right_width = val_width / 2;
 		return;
@@ -73,11 +56,11 @@ Node.prototype.set_width = function(ctx, vert_space, hor_space, term_font, nonte
 	
 	// Figure out how wide apart the children should be placed.
 	// The spacing between them should be equal.
-	this.step = 0;
-	for (var child = this.first; (child != null) && (child.next != null); child = child.next) {
+	this.step = this.children.reduce(function (max, child) {
+		if (!child.next) return max;
 		var space = child.right_width + hor_space + child.next.left_width;
-		this.step = Math.max(this.step, space);
-	}
+		return Math.max(max, space);
+	}, 0);
 	
 	this.left_width = 0.0;
 	this.right_width = 0.0;
@@ -94,9 +77,7 @@ Node.prototype.set_width = function(ctx, vert_space, hor_space, term_font, nonte
 }
 
 Node.prototype.find_height = function() {
-	this.max_y = this.y;
-	for (var child = this.first; child != null; child = child.next)
-		this.max_y = Math.max(this.max_y, child.find_height());
+	this.max_y = this.children.map(this.find_height.argThis()).reduce(Math.max, this.y);
 	return this.max_y;
 }
 
@@ -128,8 +109,8 @@ Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color, t
 	}
 	
 	ctx.fillText(this.value, this.x, this.y);
-	for (var child = this.first; child != null; child = child.next)
-		child.draw(ctx, font_size, term_font, nonterm_font, color, term_lines);
+	this.children.forEach(
+		this.draw.curry(ctx, font_size, term_font, nonterm_font, color, term_lines).argThis());
 	
 	if (!this.parent) return;
 	
@@ -150,18 +131,15 @@ Node.prototype.draw = function(ctx, font_size, term_font, nonterm_font, color, t
 }
 
 Node.prototype.find_head = function(label) {
-	for (var child = this.first; child != null; child = child.next) {
-		var res = child.find_head(label);
-		if (res != null) return res;
-	}
-	
+	var res = this.children.map(this.find_head.curry(label).argThis()).filter(Boolean);
+	if (res.nonEmpty()) return res[0];
+
 	if (this.label == label) return this;
 	return null;
 }
 
 Node.prototype.find_movement = function(mlarr, root) {
-	for (var child = this.first; child != null; child = child.next)
-		child.find_movement(mlarr, root);
+	this.children.forEach(this.find_movement.curry(mlarr, root).argThis());
 	
 	if (this.tail != null) {
 		var m = new MovementLine;
@@ -175,8 +153,7 @@ Node.prototype.reset_chains = function() {
 	this.head_chain = null;
 	this.tail_chain = null;
 	
-	for (var child = this.first; child != null; child = child.next)
-		child.reset_chains();
+	this.children.forEach(this.reset_chains.argThis());
 }
 
 Node.prototype.find_intervening_height = function(leftwards) {
