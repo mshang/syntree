@@ -187,7 +187,7 @@ $(function() {
 	$(".redraw").change(function() {return handler()});
 	$("#make-link").click(function() {
 		var loc = window.location.href;
-		loc.replace(window.location.search, "");
+		loc = loc.replace(window.location.search, "");
 		
 		window.prompt ("Link for this tree:", loc + "?i=" +
 			encodeURIComponent(document.getElementById("i").value));
