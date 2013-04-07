@@ -1,4 +1,4 @@
-﻿// By Miles Shang <mail@mshang.ca>
+// By Miles Shang <mail@mshang.ca>
 // MIT license
 
 var debug = true;
@@ -292,6 +292,7 @@ MovementLine.prototype.draw = function(ctx) {
 function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color, term_lines) {	
 	// Clean up the string
 	str = str.replace(/^\s+/, "");
+	
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
 		if (str[i] == "[") open++;
