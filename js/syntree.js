@@ -292,8 +292,6 @@ MovementLine.prototype.draw = function(ctx) {
 function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color, term_lines) {	
 	// Clean up the string
 	str = str.replace(/^\s+/, "");
-	str = str.replace(/\(/g, "[");
-	str = str.replace(/\)/g, "]");
 	
 	var open = 0;
 	for (var i = 0; i < str.length; i++) {
