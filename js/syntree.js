@@ -422,7 +422,7 @@ function parse(str) {
 			if (str[i] == "[") level++;
 			if (str[i] == "]") level--;
 			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
-				if (str.substring(start, i).search(/\w/) > -1)
+				if (str.substring(start, i).search(/[^\s]/) > -1)
 					n.children.push(parse(str.substring(start, i)));
 				start = i;
 			}
