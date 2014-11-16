@@ -153,7 +153,8 @@ try {
 	var img = go(str, font_size, term_font, nonterm_font, vert_space, hor_space, color, term_lines);
 	$("#image-goes-here").empty();
 	$("#image-goes-here").append(img);
-	
+
+	set_url();
 } catch (err) {
 	if (debug) {
 		throw(err);
@@ -203,8 +204,7 @@ $(function() {
 		var loc = window.location.href;
 		loc = loc.replace(window.location.search, "");
 		
-		window.prompt ("Link for this tree:", loc + "#i=" +
-			encodeURIComponent(document.getElementById("i").value));
+		window.prompt ("Link for this tree:", window.location.href);
 		return false;
 	});
 	$("#font-size-slider").bind("slide", function (event, ui) {
