@@ -109,6 +109,11 @@ img { border: 1px solid #bbbbbb; }
 <script type="text/javascript" src="js/syntree.js"></script>
 <script type="text/javascript">
 
+function set_url() {
+	window.location.hash = "i=" +
+		encodeURIComponent(document.getElementById("i").value);
+};
+
 function handler(font_size_update, vert_space_update, hor_space_update) {
 try {
 	// Initialize the various options.
@@ -169,10 +174,19 @@ $(function() {
 	$("#font-style-radio, #term-font-check, #nonterm-font-check").buttonset();
 	$("#accordion").accordion({collapsible: true, icons: false, autoHeight: false});
 	
+	// Try to load old-style links from the querystring.
 	try {
 		var qs = decodeURIComponent(window.location.search.slice(1));
 		qs = qs.replace(/^i=/,"");
 		qs = qs.replace(/\+/g," ");
+		if (qs == "") throw "";
+		document.getElementById("i").value = qs;
+	} catch (err) {}
+
+	// Try to load tree from hash.
+	try {
+		var qs = decodeURIComponent(window.location.hash);
+		qs = qs.replace(/^#i=/,"");
 		if (qs == "") throw "";
 		document.getElementById("i").value = qs;
 	} catch (err) {}
@@ -189,7 +203,7 @@ $(function() {
 		var loc = window.location.href;
 		loc = loc.replace(window.location.search, "");
 		
-		window.prompt ("Link for this tree:", loc + "?i=" +
+		window.prompt ("Link for this tree:", loc + "#i=" +
 			encodeURIComponent(document.getElementById("i").value));
 		return false;
 	});
