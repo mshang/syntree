@@ -293,9 +293,14 @@ function go(str, font_size, term_font, nonterm_font, vert_space, hor_space, colo
 	// Clean up the string
 	str = str.replace(/^\s+/, "");
 	var open = 0;
+    var esc = false;
 	for (var i = 0; i < str.length; i++) {
-		if (str[i] == "[") open++;
-		if (str[i] == "]") open--;
+		if (!esc) {
+            if (str[i] == "[") open++;
+            else if (str[i] == "]") open--;
+            else if (str[i] == "\\") esc = true;
+        }
+        esc = false;
 	}
 	while (open < 0) {
 		str = "[" + str;
@@ -390,15 +395,16 @@ function parse(str) {
 			function(match, tail) {
 				n.tail = tail;
 				return " ";
-			});
-		str = str.replace(/^\s+/, "");
-		str = str.replace(/\s+$/, "");
+			})
+            .replace(/^\s+/, "")
+		    .replace(/\s+$/, "")
+            .replace(/\\([\[\]])/g, "$1");     
 		n.value = str;
 		return n;
 	}
 
 	var i = 1;
-	while ((str[i] != " ") && (str[i] != "[") && (str[i] != "]")) i++;
+	while ((str[i] != " ") && (str[i] != "[" || str[i-1] == "\\") && (str[i] != "]" || str[i-1] == "\\")) i++;
 	n.value = str.substr(1, i-1)
 	n.value = n.value.replace(/\^/, 
 		function () {
@@ -419,8 +425,8 @@ function parse(str) {
 		var start = i;
 		for (; i < str.length; i++) {
 			var temp = level;
-			if (str[i] == "[") level++;
-			if (str[i] == "]") level--;
+			if (str[i] == "[" && str[i-1] != "\\") level++;
+			if (str[i] == "]" && str[i-1] != "\\") level--;
 			if (((temp == 1) && (level == 2)) || ((temp == 1) && (level == 0))) {
 				if (str.substring(start, i).search(/[^\s]/) > -1)
 					n.children.push(parse(str.substring(start, i)));
